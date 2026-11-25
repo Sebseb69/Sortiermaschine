@@ -3,208 +3,395 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#1f6feb">
+<meta name="theme-color" content="#f5f1ea">
 <title>Sortiermaschine</title>
 <!--
   Bedienoberfläche der Sortiermaschine über Bluetooth (DX-BT24, Web Bluetooth).
   Jeder Knopf schickt einen der normalen Befehle aus dem seriellen Monitor.
-  Angezeigt wird, was der Arduino ohnehin ausgibt (Zustände, Kugeln, Abzählen ...).
+  Angezeigt wird, was der Arduino ohnehin ausgibt (Zustände, Kugeln, Statistik ...).
 
   Öffnen:
     PC:    tools\Bedienung.bat (startet einen kleinen Server auf localhost und Edge)
-    Handy: Chrome (Android), Seite über https öffnen (z. B. GitHub Pages)
+    Handy: Chrome (Android), Seite über https (GitHub Pages, Datei dort als index.html)
   Eine per Doppelklick geöffnete Datei (file://) darf kein Bluetooth benutzen.
 -->
+<script>
+// Design vor dem ersten Zeichnen setzen (kein Aufblitzen)
+(function(){var t="auto";try{t=localStorage.getItem("sm-thema")||"auto"}catch(e){}
+var d=t==="auto"?(matchMedia("(prefers-color-scheme: dark)").matches?"nacht":"pastell"):t;
+document.documentElement.setAttribute("data-thema",d);})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+/* ================= Designs ================= */
 :root{
-  --bg:#f3f4f6; --karte:#ffffff; --text:#15181d; --leise:#5b636f; --rand:#dde1e7;
-  --knopf:#eceff3; --knopf-hover:#e1e5eb; --knopf-text:#15181d;
-  --akzent:#1f6feb; --akzent-text:#ffffff;
-  --gruen:#1a8f4c; --gelb:#b97c00; --rot:#c93434; --lila:#7445c4; --grau:#7a828e;
-  --log-bg:#101318; --log-text:#cdd5df; --log-leise:#7d8794; --log-befehl:#7fb4ff;
-  --schatten:0 1px 2px rgba(0,0,0,.06), 0 2px 8px rgba(0,0,0,.04);
+  /* Zustandsfarben (für alle hellen Designs gleich) */
+  --gut:#b8e3c6;     --gut-text:#173f26;
+  --achtung:#fbdf9d; --achtung-text:#4f3b00;
+  --fehler:#f5b3ae;  --fehler-text:#57170f;
+  --log-bg:#2a2833; --log-text:#ece7f3; --log-leise:#9c97a8; --log-befehl:#a9d6e5; --log-info:#fbdf9d;
   color-scheme:light;
 }
-@media (prefers-color-scheme: dark){
-  :root{
-    --bg:#0f1114; --karte:#181b20; --text:#e8ebef; --leise:#9aa3ae; --rand:#2a2f37;
-    --knopf:#232831; --knopf-hover:#2c323d; --knopf-text:#e8ebef;
-    --akzent:#3b82f6; --akzent-text:#ffffff;
-    --gruen:#34c26f; --gelb:#e0a52a; --rot:#ef5b5b; --lila:#a07cf0; --grau:#8a929c;
-    --log-bg:#0b0d10; --schatten:none;
-    color-scheme:dark;
-  }
+:root,[data-thema="pastell"]{
+  --bg:#f5f1ea; --flaeche:#fffdf9; --kachel:#efe8dd; --linie:#e3d9ca;
+  --text:#2a2833; --leise:#6d6878;
+  --knopf:#ebe3d6; --knopf-hover:#e1d7c7; --knopf-text:#2a2833;
+  --akzent:#a9d6e5; --akzent-text:#15384a;
+  --einricht:#cdb8f2; --einricht-text:#2a1b4d;
 }
+[data-thema="mint"]{
+  --bg:#ecf5f0; --flaeche:#fbfefc; --kachel:#ddede4; --linie:#cbe1d5;
+  --text:#1f2f29; --leise:#5c7267;
+  --knopf:#d8eadf; --knopf-hover:#cae2d4; --knopf-text:#1f2f29;
+  --akzent:#9edcbe; --akzent-text:#0f3a27;
+  --einricht:#c2c4f2; --einricht-text:#1f234f;
+}
+[data-thema="lavendel"]{
+  --bg:#f2eff9; --flaeche:#fdfcff; --kachel:#e7e1f4; --linie:#d9d0ec;
+  --text:#2a2540; --leise:#6a6384;
+  --knopf:#e4ddf2; --knopf-hover:#d8cfeb; --knopf-text:#2a2540;
+  --akzent:#c6b4f0; --akzent-text:#271852;
+  --einricht:#f3bdd5; --einricht-text:#51122d;
+}
+[data-thema="pfirsich"]{
+  --bg:#fcefe7; --flaeche:#fffaf6; --kachel:#f7e0d3; --linie:#efd0be;
+  --text:#382822; --leise:#7a645a;
+  --knopf:#f5ddcf; --knopf-hover:#eed0bf; --knopf-text:#382822;
+  --akzent:#ffc19e; --akzent-text:#55250d;
+  --einricht:#b6d3f2; --einricht-text:#14304f;
+}
+[data-thema="nacht"]{
+  --bg:#17181f; --flaeche:#1f2129; --kachel:#282b36; --linie:#353946;
+  --text:#ecebf4; --leise:#a3a1b6;
+  --knopf:#2c2f3c; --knopf-hover:#363a49; --knopf-text:#ecebf4;
+  --akzent:#9ccbe6; --akzent-text:#0f2838;
+  --einricht:#c5b2f2; --einricht-text:#211548;
+  --gut:#a6dbb8; --gut-text:#10301d;
+  --achtung:#f2d38c; --achtung-text:#3a2b00;
+  --fehler:#f1a7a1; --fehler-text:#45130e;
+  --log-bg:#101117; --log-text:#d9d8e6; --log-leise:#7c7a90;
+  color-scheme:dark;
+}
+
+/* ================= Grundlagen ================= */
 *{box-sizing:border-box}
 html,body{margin:0}
 body{
   background:var(--bg); color:var(--text);
-  font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  padding:0 16px calc(24px + env(safe-area-inset-bottom,0px));
+  font:15px/1.45 "Space Grotesk",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  padding:0 16px calc(28px + env(safe-area-inset-bottom,0px));
+  -webkit-tap-highlight-color:transparent;
 }
-button,input,select{font:inherit;color:inherit}
+button,input,select{font:inherit;color:inherit;border-radius:0}
 [hidden]{display:none!important}
+.zahlen{font-variant-numeric:tabular-nums}
 
-/* Kopfzeile */
+/* ================= Kopfzeile ================= */
 .kopf{
-  position:sticky; top:0; z-index:5;
-  display:flex; align-items:center; gap:12px;
-  margin:0 -16px 12px; padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;
-  background:var(--bg); border-bottom:1px solid var(--rand);
+  position:sticky; top:0; z-index:20;
+  display:flex; align-items:center; gap:10px;
+  margin:0 -16px 16px; padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;
+  background:var(--bg); border-bottom:1px solid var(--linie);
 }
-.kopf h1{font-size:18px; margin:0; font-weight:650; letter-spacing:-.01em}
-.kopf .titel{flex:1; min-width:0}
-.kopf .klein{display:block; color:var(--leise); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-
-/* Raster: Handy eine Spalte, breiter zwei */
-main{display:grid; gap:12px; max-width:1100px; margin:0 auto}
-@media (min-width:860px){
-  main{grid-template-columns:minmax(0,1fr) minmax(0,1fr); align-items:start}
-  .spalte{display:grid; gap:12px}
+.logo{width:16px; height:16px; background:var(--akzent); box-shadow:6px 6px 0 var(--einricht); margin:0 14px 6px 2px; flex:none}
+.titel{flex:1; min-width:0}
+.titel h1{font-size:18px; line-height:1.2; margin:0; font-weight:700; letter-spacing:-.02em}
+.titel span{display:block; color:var(--leise); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.design{position:relative}
+.symbol{width:46px; padding:0; display:grid; place-items:center}
+.symbol svg{width:22px; height:22px}
+.menue{
+  position:absolute; right:0; top:calc(100% + 8px); width:230px; z-index:30;
+  background:var(--flaeche); border:1px solid var(--linie); padding:6px;
+  box-shadow:0 12px 32px rgba(0,0,0,.14);
 }
-.spalte{display:grid; gap:12px; min-width:0}
+.menue h3{font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--leise); margin:6px 8px 8px; font-weight:600}
+.thema{display:flex; align-items:center; gap:10px; width:100%; background:transparent; min-height:42px; padding:6px 8px; text-align:left; font-weight:500}
+.thema:hover{background:var(--knopf)}
+.thema .vorschau{display:flex; flex:none}
+.thema .vorschau i{width:14px; height:22px; border:1px solid rgba(0,0,0,.08)}
+.thema .haken{margin-left:auto; opacity:0}
+.thema[aria-checked="true"]{background:var(--kachel)}
+.thema[aria-checked="true"] .haken{opacity:1}
 
-.karte{
-  background:var(--karte); border:1px solid var(--rand); border-radius:12px;
-  padding:14px; box-shadow:var(--schatten); min-width:0;
+/* ================= Raster ================= */
+.seite{max-width:1180px; margin:0 auto; display:grid; gap:14px}
+.zwei{display:grid; gap:14px; align-items:start}
+@media (min-width:880px){ .zwei{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} }
+.stapel{display:grid; gap:14px; min-width:0}
+
+.karte{background:var(--flaeche); border:1px solid var(--linie); padding:16px; min-width:0}
+.karte h2{
+  display:flex; align-items:center; gap:8px;
+  font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.1em; color:var(--leise); margin:0 0 12px;
 }
-.karte h2{font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--leise); margin:0 0 10px}
+.karte h2::before{content:""; width:8px; height:8px; background:var(--akzent); flex:none}
 
-/* Knöpfe */
+/* ================= Knöpfe ================= */
 button{
-  border:1px solid var(--rand); background:var(--knopf); color:var(--knopf-text);
-  border-radius:10px; padding:10px 12px; min-height:44px; cursor:pointer;
-  transition:background .15s, transform .05s; touch-action:manipulation;
+  border:0; background:var(--knopf); color:var(--knopf-text);
+  padding:10px 14px; min-height:48px; cursor:pointer; font-weight:600;
+  transition:background .15s, filter .15s, transform .06s; touch-action:manipulation;
 }
 button:hover:not(:disabled){background:var(--knopf-hover)}
-button:active:not(:disabled){transform:scale(.98)}
-button:disabled{opacity:.4; cursor:not-allowed}
-button.primaer{background:var(--akzent); border-color:var(--akzent); color:var(--akzent-text); font-weight:600}
-button.primaer:hover:not(:disabled){filter:brightness(1.08); background:var(--akzent)}
-button.warn{background:var(--rot); border-color:var(--rot); color:#fff; font-weight:600}
-button.warn:hover:not(:disabled){filter:brightness(1.08); background:var(--rot)}
-button.sicher{background:var(--gelb); border-color:var(--gelb); color:#fff}
-button.gross{min-height:64px; font-size:17px}
+button:active:not(:disabled){transform:translateY(1px)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--text); outline-offset:2px}
+button:disabled{opacity:.42; cursor:not-allowed}
+.b-akzent{background:var(--akzent); color:var(--akzent-text)}
+.b-einricht{background:var(--einricht); color:var(--einricht-text)}
+.b-fehler{background:var(--fehler); color:var(--fehler-text)}
+.b-gut{background:var(--gut); color:var(--gut-text)}
+.b-akzent:hover:not(:disabled),.b-einricht:hover:not(:disabled),.b-fehler:hover:not(:disabled),.b-gut:hover:not(:disabled){filter:brightness(.95)}
+button.sicher{background:var(--achtung); color:var(--achtung-text)}
 .knopfreihe{display:flex; flex-wrap:wrap; gap:8px}
 .knopfreihe > *{flex:1 1 140px}
-.raster{display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:8px}
+.raster{display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:8px}
 
-/* Zustand */
-.zustand{border-left:6px solid var(--grau)}
-.zustand[data-art="laeuft"]{border-left-color:var(--gruen)}
-.zustand[data-art="pause"]{border-left-color:var(--gelb)}
-.zustand[data-art="fehler"]{border-left-color:var(--rot)}
-.zustand[data-art="einricht"]{border-left-color:var(--lila)}
-.zustand-zeile{display:flex; align-items:center; gap:10px}
-.punkt{width:12px; height:12px; border-radius:50%; background:var(--grau); flex:none}
-.zustand[data-art="laeuft"] .punkt{background:var(--gruen); box-shadow:0 0 0 4px color-mix(in srgb,var(--gruen) 20%,transparent)}
-.zustand[data-art="pause"] .punkt{background:var(--gelb)}
-.zustand[data-art="fehler"] .punkt{background:var(--rot); animation:blinken 1s infinite}
-.zustand[data-art="einricht"] .punkt{background:var(--lila)}
-@keyframes blinken{50%{opacity:.25}}
-#zustandText{font-size:22px; font-weight:650; letter-spacing:-.01em}
-#zustandDetail{color:var(--leise); margin-top:2px}
-.meldung{margin-top:10px; padding:8px 10px; border-radius:8px; background:var(--knopf); font-size:14px; overflow-wrap:anywhere}
+/* Große Aktionsknöpfe */
+.aktionen{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px}
+@media (max-width:520px){ .aktionen{grid-template-columns:1fr 1fr} }
+.aktionen button{
+  min-height:84px; padding:12px 14px; text-align:left;
+  display:flex; flex-direction:column; justify-content:space-between; gap:6px;
+}
+.aktionen button .t{font-size:18px; font-weight:700; letter-spacing:-.01em; line-height:1.15}
+.aktionen button small{font-size:12px; font-weight:500; opacity:.75; line-height:1.25}
+.aktionen .b-einricht{box-shadow:inset 0 -4px 0 rgba(0,0,0,.12)}
 
-/* Kennzahlen */
+/* ================= Zustand ================= */
+.zustand{
+  padding:18px 20px; background:var(--kachel); border:1px solid var(--linie);
+  display:grid; gap:4px;
+}
+.zustand .marke{font-size:11px; text-transform:uppercase; letter-spacing:.12em; opacity:.7; font-weight:600}
+#zustandText{font-size:28px; font-weight:700; letter-spacing:-.02em; line-height:1.15; overflow-wrap:anywhere}
+#zustandDetail{opacity:.8}
+.zustand[data-art="laeuft"]{background:var(--gut); color:var(--gut-text); border-color:transparent}
+.zustand[data-art="pause"]{background:var(--achtung); color:var(--achtung-text); border-color:transparent}
+.zustand[data-art="fehler"]{background:var(--fehler); color:var(--fehler-text); border-color:transparent}
+.zustand[data-art="einricht"]{background:var(--einricht); color:var(--einricht-text); border-color:transparent}
+.zustand[data-art="fehler"] .marke::after{content:" ●"; animation:blinken 1s infinite}
+@keyframes blinken{50%{opacity:0}}
+.meldung{margin-top:10px; padding:9px 12px; background:color-mix(in srgb,var(--flaeche) 72%,transparent); color:var(--text); font-size:14px; overflow-wrap:anywhere}
+.hinweis{max-width:1180px; margin:0 auto 14px; padding:12px 14px; background:var(--fehler); color:var(--fehler-text)}
+
+/* ================= Kennzahlen und Farben ================= */
 .kennzahlen{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px}
-.zahl{background:var(--knopf); border-radius:10px; padding:10px; min-width:0}
-.zahl b{display:block; font-size:26px; font-weight:650; font-variant-numeric:tabular-nums; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.kennzahlen.vier{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:520px){ .kennzahlen.vier{grid-template-columns:1fr 1fr} }
+.zahl{background:var(--kachel); padding:12px; min-width:0}
+.zahl b{display:block; font-size:28px; font-weight:700; letter-spacing:-.02em; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-variant-numeric:tabular-nums}
 .zahl span{color:var(--leise); font-size:12px}
-
-/* Farben */
-.farben{display:grid; grid-template-columns:repeat(auto-fill,minmax(96px,1fr)); gap:8px}
-.farbe{display:grid; grid-template-columns:16px minmax(0,1fr); column-gap:6px; row-gap:2px; align-items:center; background:var(--knopf); border-radius:10px; padding:8px 10px; min-width:0}
-.farbe i{width:16px; height:16px; border-radius:50%; border:1px solid rgba(127,127,127,.5)}
+.farben{display:grid; grid-template-columns:repeat(auto-fill,minmax(98px,1fr)); gap:8px}
+.farbe{display:grid; grid-template-columns:14px minmax(0,1fr); column-gap:8px; row-gap:2px; align-items:center; background:var(--kachel); padding:10px; min-width:0}
+.farbe i,.swatch{width:14px; height:14px; box-shadow:inset 0 0 0 1px rgba(127,127,127,.45); display:inline-block; flex:none}
 .farbe span{font-size:13px; color:var(--leise); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.farbe b{grid-column:1 / -1; font-variant-numeric:tabular-nums; font-size:22px; line-height:1.1}
+.farbe b{grid-column:1 / -1; font-size:24px; font-weight:700; line-height:1.1; font-variant-numeric:tabular-nums}
 
-/* Formularzeilen */
+/* ================= Formulare ================= */
 .zeile{display:flex; flex-wrap:wrap; gap:8px; align-items:stretch}
 .zeile input,.zeile select{
-  flex:1 1 90px; min-width:0; min-height:44px; padding:8px 10px;
-  border:1px solid var(--rand); border-radius:10px; background:var(--karte);
+  flex:1 1 100px; min-width:0; min-height:48px; padding:8px 12px;
+  border:1px solid var(--linie); background:var(--flaeche);
 }
+.zeile select{flex-basis:150px}
 .zeile button{flex:0 1 auto}
-.zeile select{flex-basis:140px}
-.fortschritt{height:8px; border-radius:4px; background:var(--knopf); overflow:hidden; margin-top:10px}
+.fortschritt{height:10px; background:var(--kachel); margin-top:12px}
 .fortschritt > div{height:100%; width:0; background:var(--akzent); transition:width .3s}
 .leise{color:var(--leise); font-size:13px}
 .abstand{margin-top:10px}
 
-/* Einrichtbetrieb */
-.auswahl{font-size:20px; font-weight:650}
-.auswahl small{font-size:13px; font-weight:400; color:var(--gelb); margin-left:6px}
-.behaelter button{display:flex; align-items:center; justify-content:center; gap:6px}
-.behaelter i{width:12px; height:12px; border-radius:50%; border:1px solid rgba(127,127,127,.5)}
-.ls{display:flex; gap:8px}
-.ls div{flex:1; text-align:center; padding:10px; border-radius:10px; background:var(--knopf); font-weight:600}
-.ls div.belegt{background:var(--akzent); color:#fff}
+/* ================= Statistik ================= */
+.ansichtkopf{display:flex; flex-wrap:wrap; align-items:center; gap:10px}
+.karte.ansichtkopf h2{font-size:22px; margin:0; letter-spacing:-.02em; flex:1; min-width:160px; text-transform:none; color:var(--text); font-weight:700}
+.karte.ansichtkopf h2::before{width:12px; height:12px}
+.vierer{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px}
+@media (max-width:520px){ .zahl b{font-size:22px} }
+.ansichtkopf .knopfreihe{flex:0 1 auto}
+.ansichtkopf .knopfreihe > *{flex:0 1 auto}
+.sf{display:grid; grid-template-columns:96px minmax(0,1fr) 44px 46px; gap:10px; align-items:center; padding:6px 0}
+.sf + .sf{border-top:1px solid var(--linie)}
+.sf-name{display:flex; align-items:center; gap:8px; font-size:14px}
+.sf-balken{height:16px; background:var(--kachel)}
+.sf-balken i{display:block; height:100%; box-shadow:inset 0 0 0 1px rgba(127,127,127,.35)}
+.sf b{text-align:right; font-variant-numeric:tabular-nums}
+.sf-proz{text-align:right; color:var(--leise); font-size:13px; font-variant-numeric:tabular-nums}
+.tabelle{width:100%; border-collapse:collapse}
+.tabelle td{padding:9px 0; border-top:1px solid var(--linie); vertical-align:top}
+.tabelle tr:first-child td{border-top:0}
+.tabelle td:last-child{text-align:right; font-variant-numeric:tabular-nums; padding-left:12px}
+.tabelle tr.null td{color:var(--leise)}
+.tabelle tr.markiert td:last-child{font-weight:700}
 
-/* Protokoll */
+/* ================= Einrichtbetrieb ================= */
+.auswahl{font-size:24px; font-weight:700; letter-spacing:-.02em}
+.auswahl small{font-size:12px; font-weight:600; margin-left:8px; padding:3px 6px; background:var(--achtung); color:var(--achtung-text); vertical-align:middle}
+.behaelter button{display:flex; align-items:center; justify-content:flex-start; gap:8px}
+.ls{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+.ls div{padding:14px; background:var(--kachel); font-weight:700; text-align:center}
+.ls div.belegt{background:var(--akzent); color:var(--akzent-text)}
+
+/* ================= Protokoll ================= */
 #log{
-  background:var(--log-bg); color:var(--log-text); border-radius:8px;
-  font:12px/1.45 ui-monospace,Consolas,"Cascadia Mono",Menlo,monospace;
-  height:300px; overflow:auto; padding:8px 10px; white-space:pre-wrap; overflow-wrap:anywhere;
+  background:var(--log-bg); color:var(--log-text);
+  font:12px/1.5 ui-monospace,Consolas,"Cascadia Mono",Menlo,monospace;
+  height:280px; overflow:auto; padding:10px 12px; white-space:pre-wrap; overflow-wrap:anywhere;
 }
 #log .z{color:var(--log-leise)}
 #log .befehl{color:var(--log-befehl)}
-#log .info{color:#e0b35a}
-.hinweis{max-width:1100px; margin:0 auto 12px; padding:12px 14px; border-radius:10px; background:color-mix(in srgb,var(--rot) 14%,var(--karte)); border:1px solid var(--rot)}
+#log .info{color:var(--log-info)}
 </style>
 </head>
 <body>
 
 <header class="kopf">
+  <span class="logo" aria-hidden="true"></span>
   <div class="titel">
     <h1>Sortiermaschine</h1>
-    <span class="klein" id="kopfInfo">Nicht verbunden</span>
+    <span id="kopfInfo">Nicht verbunden</span>
   </div>
-  <button id="btnVerbinden" class="primaer">Verbinden</button>
+  <div class="design">
+    <button id="btnDesign" class="symbol" aria-haspopup="true" aria-expanded="false" title="Design wählen" aria-label="Design wählen">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="miter"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8" fill="currentColor"/></svg>
+    </button>
+    <div id="designMenue" class="menue" role="menu" hidden>
+      <h3>Design</h3>
+      <div id="themenListe"></div>
+    </div>
+  </div>
+  <button id="btnVerbinden" class="b-akzent">Verbinden</button>
 </header>
 
 <div id="hinweis" class="hinweis" hidden></div>
 
-<main>
-  <div class="spalte">
-    <section class="karte zustand" id="zustandKarte" data-art="getrennt">
-      <div class="zustand-zeile"><span class="punkt"></span><span id="zustandText">Nicht verbunden</span></div>
-      <div id="zustandDetail">Oben auf „Verbinden“ tippen und „Sortiermaschine“ wählen.</div>
-      <div id="meldung" class="meldung" hidden></div>
-    </section>
+<div class="seite">
+  <section class="zustand" id="zustandKarte" data-art="getrennt" aria-live="polite">
+    <span class="marke" id="zustandMarke">Status</span>
+    <span id="zustandText">Nicht verbunden</span>
+    <span id="zustandDetail">Oben auf „Verbinden“ tippen und „Sortiermaschine“ wählen.</span>
+    <div id="meldung" class="meldung" hidden></div>
+  </section>
 
-    <!-- Normalbetrieb -->
-    <div id="normal" class="spalte">
-      <section class="knopfreihe">
-        <button id="btnPause" class="gross primaer" data-cmd="p">Pause</button>
-        <button id="btnQuittieren" class="gross warn" data-cmd="q" disabled>Fehler quittieren</button>
-      </section>
+  <!-- Große Aktionsknöpfe: Normalbetrieb -->
+  <section class="aktionen" id="aktionenNormal">
+    <button id="btnEinricht" class="b-einricht" data-cmd="e"><span class="t">Einrichtbetrieb</span><small id="btnEinrichtText">Positionen, Farben, Bauteile</small></button>
+    <button id="btnPause" class="b-akzent" data-cmd="p"><span class="t" id="btnPauseT">Pause</span><small id="btnPauseText">nach der laufenden Kugel</small></button>
+    <button id="btnQuittieren" class="b-fehler" data-cmd="q" disabled><span class="t">Fehler quittieren</span><small>nach dem Beheben</small></button>
+    <button id="btnStatistik"><span class="t" id="btnStatistikT">Statistik</span><small id="btnStatistikText">Auswertung öffnen</small></button>
+  </section>
 
+  <!-- Große Aktionsknöpfe: Einrichtbetrieb -->
+  <section class="aktionen" id="aktionenEinricht" hidden>
+    <button class="b-einricht" data-cmd="x"><span class="t">Einrichten beenden</span><small>Sortieren startet wieder</small></button>
+    <button class="b-akzent" data-cmd="s"><span class="t">Speichern</span><small>Positionen und Farben ins EEPROM</small></button>
+    <button data-cmd="l"><span class="t">Liste</span><small>alle Positionen und Farbwerte</small></button>
+  </section>
+
+  <!-- ================= Übersicht ================= -->
+  <div id="ansichtUebersicht" class="zwei">
+    <div class="stapel">
       <section class="karte">
+        <h2>Überblick</h2>
         <div class="kennzahlen">
           <div class="zahl"><b id="kugeln">–</b><span>Kugeln</span></div>
           <div class="zahl"><b id="tempo">–</b><span>pro Minute</span></div>
           <div class="zahl"><b id="abzKurz">aus</b><span>Abzählen</span></div>
         </div>
       </section>
-
       <section class="karte">
         <h2>Kugeln je Farbe</h2>
         <div class="farben" id="farben"></div>
       </section>
     </div>
+    <div class="stapel">
+      <section class="karte">
+        <h2>Abzählen</h2>
+        <form id="formAbz">
+          <div class="zeile">
+            <input id="abzAnzahl" type="number" min="1" max="999" inputmode="numeric" placeholder="Anzahl">
+            <select id="abzFarbe" aria-label="Farbe"><option value="">alle Farben</option></select>
+          </div>
+          <div class="knopfreihe abstand">
+            <button type="submit" class="b-akzent">Abzählen starten</button>
+            <button type="button" data-cmd="n 0">Aus</button>
+          </div>
+        </form>
+        <div class="fortschritt" id="abzBalkenRahmen" hidden><div id="abzBalken"></div></div>
+        <div class="leise abstand" id="abzText">Nach der eingestellten Anzahl macht die Maschine Pause.</div>
+      </section>
+      <section class="karte">
+        <h2>Weitere Befehle</h2>
+        <div class="raster">
+          <button data-cmd="status">Aktualisieren</button>
+          <button id="btnSummer" data-cmd="ton aus">Summer aus</button>
+          <button data-cmd="test">Selbsttest</button>
+          <button data-cmd="rs">Radsuche</button>
+          <button data-cmd="reset" data-sicher>Zähler auf 0</button>
+          <button data-cmd="neustart" data-sicher>Neustart</button>
+        </div>
+        <p class="leise">Selbsttest und Radsuche nur in Pause oder bei einem Fehler (Kammern leer).</p>
+      </section>
+    </div>
+  </div>
 
-    <!-- Einrichtbetrieb -->
-    <div id="einricht" class="spalte" hidden>
+  <!-- ================= Statistik ================= -->
+  <div id="ansichtStatistik" class="stapel" hidden>
+    <section class="karte ansichtkopf">
+      <h2>Statistik</h2>
+      <span class="leise" id="statStand">noch keine Daten</span>
+      <div class="knopfreihe">
+        <button class="b-akzent" id="btnStatAktualisieren">Aktualisieren</button>
+        <button id="btnStatZurueck">Zurück</button>
+      </div>
+    </section>
+    <section class="karte" id="statLeer">
+      <p class="leise" style="margin:0">Noch keine Statistik empfangen. Verbinden und „Aktualisieren“ tippen.</p>
+    </section>
+    <div id="statInhalt" class="stapel" hidden>
+      <section class="karte">
+        <div class="kennzahlen vier">
+          <div class="zahl"><b id="stLaufzeit">–</b><span>Laufzeit</span></div>
+          <div class="zahl"><b id="stKugeln">–</b><span>Kugeln sortiert</span></div>
+          <div class="zahl"><b id="stZyklus">–</b><span>Ø Zykluszeit</span></div>
+          <div class="zahl"><b id="stTempo">–</b><span>Kugeln pro Minute</span></div>
+        </div>
+      </section>
+      <div class="zwei">
+        <section class="karte">
+          <h2>Verteilung nach Farbe</h2>
+          <div id="stFarben"></div>
+        </section>
+        <section class="karte">
+          <h2>Ablauf</h2>
+          <table class="tabelle" id="stAblauf"></table>
+        </section>
+        <section class="karte">
+          <h2>Fehler</h2>
+          <table class="tabelle" id="stFehler"></table>
+        </section>
+        <section class="karte">
+          <h2>Farbsensor</h2>
+          <table class="tabelle" id="stSensor"></table>
+          <p class="leise">1,000 = so hell wie beim Kalibrieren. Ab 1,040 kommt die Warnung „Sensor reinigen“.</p>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= Einrichtbetrieb ================= -->
+  <div id="ansichtEinricht" class="zwei" hidden>
+    <div class="stapel">
       <section class="karte">
         <h2>Position einstellen</h2>
-        <div class="auswahl" id="auswahl">–</div>
+        <div class="auswahl" id="auswahl">Behälter oder Schranke wählen</div>
         <div class="raster behaelter abstand" id="behaelter"></div>
         <div class="knopfreihe abstand">
           <button data-cmd="z">Schranke zu</button>
           <button data-cmd="a">Schranke auf</button>
         </div>
-        <div class="knopfreihe abstand">
+        <div class="vierer abstand">
           <button data-cmd="--">−5°</button>
           <button data-cmd="-">−1°</button>
           <button data-cmd="+">+1°</button>
@@ -215,27 +402,9 @@ button.gross{min-height:64px; font-size:17px}
           <button type="submit">Winkel setzen</button>
         </form>
         <div class="knopfreihe abstand">
-          <button class="primaer" data-cmd="s">Speichern</button>
-          <button data-cmd="l">Liste</button>
-          <button data-cmd="r" data-sicher>Standardpositionen</button>
+          <button data-cmd="r" data-sicher>Standardpositionen laden</button>
         </div>
       </section>
-
-      <section class="karte">
-        <h2>Farbsensor</h2>
-        <div class="knopfreihe">
-          <button data-cmd="m">Testmessung</button>
-        </div>
-        <form class="zeile abstand" id="formLernen">
-          <select id="lernFarbe"></select>
-          <button type="submit">Kugel einlernen</button>
-        </form>
-        <div class="knopfreihe abstand">
-          <button data-cmd="rk" data-sicher>Farbwerte aus dem Code</button>
-        </div>
-        <p class="leise">Einlernen: Kugel an die Schranke legen, Farbe wählen, danach „Speichern“.</p>
-      </section>
-
       <section class="karte">
         <h2>Lichtschranken</h2>
         <div class="ls"><div id="ls1">LS1 ?</div><div id="ls2">LS2 ?</div></div>
@@ -243,7 +412,22 @@ button.gross{min-height:64px; font-size:17px}
           <button data-cmd="ls" id="btnLsLive">Live-Anzeige an</button>
         </div>
       </section>
-
+    </div>
+    <div class="stapel">
+      <section class="karte">
+        <h2>Farbsensor</h2>
+        <div class="knopfreihe">
+          <button class="b-akzent" data-cmd="m">Testmessung</button>
+        </div>
+        <form class="zeile abstand" id="formLernen">
+          <select id="lernFarbe" aria-label="Farbe zum Einlernen"></select>
+          <button type="submit">Kugel einlernen</button>
+        </form>
+        <div class="knopfreihe abstand">
+          <button data-cmd="rk" data-sicher>Farbwerte aus dem Code laden</button>
+        </div>
+        <p class="leise">Einlernen: Kugel an die Schranke legen, Farbe wählen, danach „Speichern“.</p>
+      </section>
       <section class="karte">
         <h2>Rad und Summer</h2>
         <div class="raster">
@@ -254,74 +438,38 @@ button.gross{min-height:64px; font-size:17px}
           <button data-cmd="t">Summer testen</button>
         </div>
         <form class="zeile abstand" id="formSchritte">
-          <input id="schritte" type="number" min="-400" max="400" inputmode="numeric" placeholder="Schritte (−400…400)">
+          <input id="schritte" type="number" min="-400" max="400" inputmode="numeric" placeholder="Schritte (−400 bis 400)">
           <button type="submit">Drehen</button>
         </form>
-      </section>
-
-      <section class="knopfreihe">
-        <button class="gross primaer" data-cmd="x">Einrichten beenden</button>
       </section>
     </div>
   </div>
 
-  <div class="spalte">
-    <section class="karte" id="karteAbz">
-      <h2>Abzählen</h2>
-      <form id="formAbz">
-        <div class="zeile">
-          <input id="abzAnzahl" type="number" min="1" max="999" inputmode="numeric" placeholder="Anzahl">
-          <select id="abzFarbe"><option value="">alle Farben</option></select>
-        </div>
-        <div class="knopfreihe abstand">
-          <button type="submit" class="primaer">Abzählen starten</button>
-          <button type="button" data-cmd="n 0">Aus</button>
-        </div>
-      </form>
-      <div class="fortschritt" id="abzBalkenRahmen" hidden><div id="abzBalken"></div></div>
-      <div class="leise abstand" id="abzText">Nach der eingestellten Anzahl macht die Maschine Pause.</div>
-    </section>
-
-    <section class="karte" id="karteWeitere">
-      <h2>Weitere Befehle</h2>
-      <div class="raster">
-        <button data-cmd="status">Aktualisieren</button>
-        <button data-cmd="i">Statistik</button>
-        <button id="btnSummer" data-cmd="ton aus">Summer aus</button>
-        <button data-cmd="test">Selbsttest</button>
-        <button data-cmd="rs">Radsuche</button>
-        <button data-cmd="e">Einrichtbetrieb</button>
-        <button data-cmd="reset" data-sicher>Zähler auf 0</button>
-        <button data-cmd="neustart" data-sicher>Neustart</button>
-      </div>
-      <p class="leise">Selbsttest und Radsuche nur in Pause oder bei einem Fehler (Kammern leer).</p>
-    </section>
-
-    <section class="karte">
-      <h2>Protokoll</h2>
-      <div id="log" aria-live="polite"></div>
-      <form class="zeile abstand" id="formBefehl">
-        <input id="befehl" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Befehl eintippen (h = Hilfe)">
-        <button type="submit">Senden</button>
-      </form>
-      <div class="knopfreihe abstand">
-        <button type="button" id="btnLogSpeichern">Protokoll speichern</button>
-        <button type="button" id="btnLogLeeren">Leeren</button>
-      </div>
-    </section>
-  </div>
-</main>
+  <!-- ================= Protokoll ================= -->
+  <section class="karte">
+    <h2>Protokoll</h2>
+    <div id="log" aria-live="off"></div>
+    <form class="zeile abstand" id="formBefehl">
+      <input id="befehl" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Befehl eintippen (h = Hilfe)">
+      <button type="submit">Senden</button>
+    </form>
+    <div class="knopfreihe abstand">
+      <button type="button" id="btnLogSpeichern">Protokoll speichern</button>
+      <button type="button" id="btnLogLeeren">Leeren</button>
+    </div>
+  </section>
+</div>
 
 <script>
 "use strict";
 
-// ---------- Einstellungen ----------
-const DIENST = 0xffe0;        // DX-BT24: Dienst
-const KANAL  = 0xffe1;        // DX-BT24: Daten (Notify + Write)
-const BLOCK  = 20;            // Bytes pro BLE-Paket
+// ================= Einstellungen =================
+const DIENST = 0xffe0;           // DX-BT24: Dienst
+const KANAL  = 0xffe1;           // DX-BT24: Daten (Notify + Write)
+const BLOCK  = 20;               // Bytes pro BLE-Paket
 const ARDUINO_BEREIT_MS = 2200;  // der Arduino nimmt Befehle erst ca. 1,5 s nach dem Verbinden an (STATE)
-const LOG_ANZEIGE = 400;      // so viele Zeilen sichtbar
-const LOG_MAX = 50000;        // so viele Zeilen zum Speichern
+const LOG_ANZEIGE = 400;         // so viele Zeilen sichtbar
+const LOG_MAX = 50000;           // so viele Zeilen zum Speichern
 
 const FARBEN = [
   {name:"Schwarz", text:"Schwarz", farbe:"#1d1d1f"},
@@ -332,6 +480,14 @@ const FARBEN = [
   {name:"Weiss",   text:"Weiß",    farbe:"#f6f6f6"},
   {name:"Rot",     text:"Rot",     farbe:"#d93a3a"},
 ];
+const THEMEN = [
+  {id:"auto",     name:"Automatisch", vorschau:["#f5f1ea","#a9d6e5","#17181f"]},
+  {id:"pastell",  name:"Pastell",     vorschau:["#f5f1ea","#a9d6e5","#cdb8f2"]},
+  {id:"mint",     name:"Mint",        vorschau:["#ecf5f0","#9edcbe","#c2c4f2"]},
+  {id:"lavendel", name:"Lavendel",    vorschau:["#f2eff9","#c6b4f0","#f3bdd5"]},
+  {id:"pfirsich", name:"Pfirsich",    vorschau:["#fcefe7","#ffc19e","#b6d3f2"]},
+  {id:"nacht",    name:"Nacht",       vorschau:["#17181f","#9ccbe6","#c5b2f2"]},
+];
 const SCHRITTE = {
   WARTEN:"wartet auf die nächste Kugel", SCHRITT_1:"Kugel fällt zur Schranke",
   SCHRITT_2:"misst die Farbe", SCHRITT_3:"Brücke fährt", SCHRITT_4:"Schranke offen",
@@ -340,13 +496,15 @@ const SCHRITTE = {
 };
 const MELDUNGEN = /^(Kein Fehler aktiv|Kugel liegt noch|Nur in Pause|Unbekannter Befehl|WARNUNG|ACHTUNG|Rohwerte|Gespeichert|Radsuche: |Fehler quittiert|Neustart|Selbsttest wird|Werte schwanken|Kein Signal|Naechste andere Farbe|Farbwerte aus dem Code|Standardwerte geladen|Trichter geruettelt|Rad: |Summer: |Ungueltig|Schrittzahl|Farbnummer|Erst Handy)/;
 
-// ---------- Zustand ----------
+// ================= Zustand =================
 const z = {
   verbunden:false, bereit:false, zustand:null, pause:false, pauseFolgt:false,
   fehler:"", einricht:false, einrichtFolgt:false, kugeln:null, tempo:null,
   anzahl:FARBEN.map(()=>null), abz:{ziel:0, stand:0, farbe:null, erreicht:false},
   summer:null, programm:"", lsLive:false, auswahl:null, winkel:null, ungespeichert:false,
+  stat:null, statFehler:[], statZeit:"",
 };
+let ansicht="uebersicht";
 let geraet=null, kanal=null, ohneAntwort=false, manuellGetrennt=false;
 let rest="", decoder=new TextDecoder("utf-8");
 let erwarteFehlerGrund=false, imStatus=false, csvKopf=null, modusPruefen=false;
@@ -354,18 +512,48 @@ let schreibKette=Promise.resolve();
 const logZeilen=[];
 
 const $ = id => document.getElementById(id);
+const esc = t => String(t).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
-// ---------- Aufbau ----------
+// ================= Designs =================
+function themaGewaehlt(){ try{ return localStorage.getItem("sm-thema")||"auto"; }catch(e){ return "auto"; } }
+function themaAnwenden(){
+  const id=themaGewaehlt();
+  const echt = id==="auto" ? (matchMedia("(prefers-color-scheme: dark)").matches ? "nacht" : "pastell") : id;
+  document.documentElement.dataset.thema=echt;
+  document.querySelector('meta[name="theme-color"]').content=getComputedStyle(document.body).getPropertyValue("--bg").trim()||"#f5f1ea";
+  document.querySelectorAll(".thema").forEach(b=>b.setAttribute("aria-checked", b.dataset.thema===id ? "true" : "false"));
+}
+function themenAufbauen(){
+  $("themenListe").innerHTML = THEMEN.map(t=>
+    `<button class="thema" role="menuitemradio" data-thema="${t.id}" aria-checked="false">
+       <span class="vorschau">${t.vorschau.map(f=>`<i style="background:${f}"></i>`).join("")}</span>
+       ${t.name}<span class="haken">✓</span></button>`).join("");
+  $("themenListe").addEventListener("click", e=>{
+    const b=e.target.closest(".thema"); if(!b) return;
+    try{ localStorage.setItem("sm-thema", b.dataset.thema); }catch(e){}
+    themaAnwenden(); menueZu();
+  });
+  $("btnDesign").addEventListener("click", e=>{ e.stopPropagation(); $("designMenue").hidden ? menueAuf() : menueZu(); });
+  document.addEventListener("click", e=>{ if(!e.target.closest(".design")) menueZu(); });
+  document.addEventListener("keydown", e=>{ if(e.key==="Escape") menueZu(); });
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", themaAnwenden);
+  themaAnwenden();
+}
+function menueAuf(){ $("designMenue").hidden=false; $("btnDesign").setAttribute("aria-expanded","true"); }
+function menueZu(){ $("designMenue").hidden=true; $("btnDesign").setAttribute("aria-expanded","false"); }
+
+// ================= Aufbau =================
 function aufbauen(){
   const farben=$("farben"), beh=$("behaelter"), lern=$("lernFarbe"), abz=$("abzFarbe");
   FARBEN.forEach((f,i)=>{
     farben.insertAdjacentHTML("beforeend",
       `<div class="farbe"><i style="background:${f.farbe}"></i><span>${f.text}</span><b id="anz${i}">–</b></div>`);
     beh.insertAdjacentHTML("beforeend",
-      `<button data-cmd="${i+1}"><i style="background:${f.farbe}"></i>${f.text}</button>`);
+      `<button data-cmd="${i+1}"><span class="swatch" style="background:${f.farbe}"></span>${f.text}</button>`);
     lern.insertAdjacentHTML("beforeend", `<option value="${i+1}">${i+1} ${f.text}</option>`);
     abz.insertAdjacentHTML("beforeend", `<option value="${i+1}">nur ${f.text}</option>`);
   });
+  themenAufbauen();
 
   document.addEventListener("click", e=>{
     const b=e.target.closest("button[data-cmd]");
@@ -374,6 +562,13 @@ function aufbauen(){
     senden(b.dataset.cmd);
   });
   $("btnVerbinden").addEventListener("click", ()=> z.verbunden ? trennen() : verbinden());
+  $("btnStatistik").addEventListener("click", ()=>{
+    if(ansicht==="statistik"){ ansicht="uebersicht"; }
+    else { ansicht="statistik"; if(z.bereit) senden("csv"); }
+    anzeigen(); window.scrollTo({top:0, behavior:"smooth"});
+  });
+  $("btnStatZurueck").addEventListener("click", ()=>{ ansicht="uebersicht"; anzeigen(); });
+  $("btnStatAktualisieren").addEventListener("click", ()=> senden("csv"));
   $("formBefehl").addEventListener("submit", e=>{ e.preventDefault(); const t=$("befehl").value.trim(); if(t){ senden(t); $("befehl").value=""; } });
   $("formAbz").addEventListener("submit", e=>{
     e.preventDefault();
@@ -391,7 +586,7 @@ function aufbauen(){
   $("formSchritte").addEventListener("submit", e=>{
     e.preventDefault();
     const s=parseInt($("schritte").value,10);
-    if(!s || Math.abs(s)>400){ meldung("Schritte −400…400 (nicht 0)"); return; }
+    if(!s || Math.abs(s)>400){ meldung("Schritte −400 bis 400 (nicht 0)"); return; }
     senden(`d ${s}`);
   });
   $("formLernen").addEventListener("submit", e=>{ e.preventDefault(); senden(`k ${$("lernFarbe").value}`); });
@@ -416,7 +611,7 @@ function sicherheitsabfrage(b){
   return false;
 }
 
-// ---------- Bluetooth ----------
+// ================= Bluetooth =================
 async function verbinden(){
   try{
     manuellGetrennt=false;
@@ -506,7 +701,7 @@ function datenEmpfangen(e){
   anzeigen();
 }
 
-// ---------- Ausgaben des Arduino auswerten ----------
+// ================= Ausgaben des Arduino auswerten =================
 function farbIndex(name){ return FARBEN.findIndex(f=>f.name===name); }
 function zahl(t){ return parseFloat(String(t).replace(",", ".")); }
 
@@ -523,7 +718,7 @@ function verarbeiten(t){
     }
     else if((m=t.match(/^Fehler:\s+(.+)$/))) z.fehler=m[1];
     else if((m=t.match(/^Kugeln:\s+(\d+)(?:, Tempo ([\d.]+)\/min)?/))){ z.kugeln=+m[1]; if(m[2]) z.tempo=zahl(m[2]); }
-    else if((m=t.match(/^Abzaehlen:\s+aus/))) z.abz.ziel=0;
+    else if(/^Abzaehlen:\s+aus/.test(t)) z.abz.ziel=0;
     else if((m=t.match(/^Abzaehlen:\s+(\d+)\/(\d+)(?: (\w+))?/))){ z.abz.stand=+m[1]; z.abz.ziel=+m[2]; z.abz.farbe=m[3]||null; }
     else if((m=t.match(/^Programm:\s+(\S+)/))) z.programm=m[1];
     else if((m=t.match(/^Summer:\s+(an|aus)/))){ z.summer=m[1]; imStatus=false; }
@@ -547,7 +742,7 @@ function verarbeiten(t){
   if(t.startsWith("Pause beendet")){ z.pause=false; return; }
   if(t.startsWith("Pause abgebrochen")){ z.pauseFolgt=false; return; }
   if(t.startsWith("Zaehler und Statistik zurueckgesetzt") || t.startsWith("Neustart...") || t.startsWith("Programm:")){
-    z.kugeln=0; z.tempo=null; z.anzahl=FARBEN.map(()=>0); z.abz.stand=0; z.abz.erreicht=false;
+    z.kugeln=0; z.tempo=null; z.anzahl=FARBEN.map(()=>0); z.abz.stand=0; z.abz.erreicht=false; z.stat=null;
     if((m=t.match(/^Programm:\s+(\S+)/))){ z.programm=m[1]; z.abz.ziel=0; z.pause=false; z.pauseFolgt=false; z.einricht=false; }
     if(t.startsWith("Neustart")) meldung("Arduino startet neu …");
     return;
@@ -560,14 +755,7 @@ function verarbeiten(t){
     return;
   }
   if(t.startsWith("CSV_Kopf;")){ csvKopf=t.split(";"); return; }
-  if(t.startsWith("CSV;") && csvKopf){
-    const w=t.split(";"), spalte=n=>w[csvKopf.indexOf(n)];
-    if(csvKopf.includes("Kugeln")) z.kugeln=+spalte("Kugeln");
-    FARBEN.forEach((f,i)=>{ if(csvKopf.includes(f.name)) z.anzahl[i]=+spalte(f.name); });
-    const kpm=spalte("Kugeln_pro_min"); if(kpm) z.tempo=zahl(kpm);
-    if(w[1]) z.programm=w[1];
-    return;
-  }
+  if(t.startsWith("CSV;") && csvKopf){ csvAuswerten(t.split(";")); return; }
   if(t==="=== Einrichtbetrieb ==="){
     z.einricht=true; z.einrichtFolgt=false;
     if(modusPruefen){ modusPruefen=false; senden("l", true); }
@@ -591,50 +779,79 @@ function verarbeiten(t){
   if(MELDUNGEN.test(t)) meldung(t);
 }
 
+// CSV-Zeile der Statistik: Spaltennamen aus "CSV_Kopf;..."
+function csvAuswerten(w){
+  const s={};
+  csvKopf.forEach((name,i)=>{ if(i>0) s[name]=w[i]??""; });
+  z.stat=s;
+  const von=csvKopf.indexOf("Doppelt"), bis=csvKopf.indexOf("Helligkeit");
+  z.statFehler = (von>=0 && bis>von) ? csvKopf.slice(von+1,bis).map(n=>({name:n, anzahl:+s[n]||0})) : [];
+  z.statZeit=new Date().toTimeString().slice(0,8);
+  if(s.Kugeln!==undefined) z.kugeln=+s.Kugeln;
+  FARBEN.forEach((f,i)=>{ if(s[f.name]!==undefined) z.anzahl[i]=+s[f.name]; });
+  if(s.Kugeln_pro_min) z.tempo=zahl(s.Kugeln_pro_min);
+  if(s.Programm) z.programm=s.Programm;
+}
+
 function lsZeigen(a,b){
   $("ls1").textContent="LS1 "+a; $("ls1").className=a==="belegt"?"belegt":"";
   $("ls2").textContent="LS2 "+b; $("ls2").className=b==="belegt"?"belegt":"";
 }
 
-// ---------- Anzeige ----------
+// ================= Anzeige =================
 function kopfInfo(){
   $("kopfInfo").textContent = z.verbunden
     ? (z.bereit ? "Verbunden" : "Verbinde …") + (z.programm ? " · "+z.programm : "")
     : "Nicht verbunden";
 }
 
+function dauer(sek){
+  sek=Math.max(0,Math.round(sek)); const h=Math.floor(sek/3600), m=Math.floor(sek%3600/60), s=sek%60;
+  if(h) return `${h} h ${String(m).padStart(2,"0")} min`;
+  if(m) return `${m} min ${String(s).padStart(2,"0")} s`;
+  return `${s} s`;
+}
+
 function anzeigen(){
   kopfInfo();
   const btn=$("btnVerbinden");
   btn.textContent = z.verbunden ? "Trennen" : "Verbinden";
-  btn.classList.toggle("primaer", !z.verbunden);
+  btn.className = z.verbunden ? "" : "b-akzent";
 
   // Zustand
-  let art="getrennt", text="Nicht verbunden", detail="Oben auf „Verbinden“ tippen und „Sortiermaschine“ wählen.";
+  let art="getrennt", marke="Status", text="Nicht verbunden", detail="Oben auf „Verbinden“ tippen und „Sortiermaschine“ wählen.";
   if(z.verbunden){
-    if(z.einricht){ art="einricht"; text="Einrichtbetrieb"; detail="Positionen einstellen, Farben einlernen, Bauteile testen"; }
-    else if(z.zustand==="FEHLER"){ art="fehler"; text=z.fehler||"Fehler"; detail="Ursache beheben, dann „Fehler quittieren“"; }
-    else if(z.pause){ art="pause"; text=z.abz.erreicht?"Ziel erreicht":"Pause"; detail=z.abz.erreicht?"Behälter leeren, dann „Weiter“":"„Weiter“ setzt das Sortieren fort"; }
-    else if(z.zustand){ art="laeuft"; text=z.pauseFolgt?"Pause folgt …":"Sortiert"; detail=SCHRITTE[z.zustand]||z.zustand; }
-    else { text="Verbunden"; detail="Zustand wird abgefragt …"; }
+    if(z.einricht){ art="einricht"; marke="Einrichtbetrieb"; text="Einrichten"; detail="Positionen einstellen, Farben einlernen, Bauteile testen"; }
+    else if(z.zustand==="FEHLER"){ art="fehler"; marke="Fehler"; text=z.fehler||"Fehler"; detail="Ursache beheben, dann „Fehler quittieren“"; }
+    else if(z.pause){ art="pause"; marke="Pause"; text=z.abz.erreicht?"Ziel erreicht":"Pause"; detail=z.abz.erreicht?"Behälter leeren, dann „Weiter“":"„Weiter“ setzt das Sortieren fort"; }
+    else if(z.zustand){ art="laeuft"; marke="Betrieb"; text=z.pauseFolgt?"Pause folgt …":"Sortiert"; detail=SCHRITTE[z.zustand]||z.zustand; }
+    else { marke="Verbunden"; text="Verbunden"; detail="Zustand wird abgefragt …"; }
     if(z.einrichtFolgt && !z.einricht) detail="Einrichtbetrieb startet, sobald die Kugel sortiert ist";
   }
-  $("zustandKarte").dataset.art=art; $("zustandText").textContent=text; $("zustandDetail").textContent=detail;
+  $("zustandKarte").dataset.art=art; $("zustandMarke").textContent=marke;
+  $("zustandText").textContent=text; $("zustandDetail").textContent=detail;
 
-  // Bereiche
-  $("normal").hidden=z.einricht; $("einricht").hidden=!z.einricht;
-  $("karteAbz").hidden=z.einricht; $("karteWeitere").hidden=z.einricht;
+  // Ansichten
+  const zeigEinricht=z.einricht, zeigStat=!z.einricht && ansicht==="statistik";
+  $("aktionenNormal").hidden=zeigEinricht; $("aktionenEinricht").hidden=!zeigEinricht;
+  $("ansichtEinricht").hidden=!zeigEinricht;
+  $("ansichtStatistik").hidden=!zeigStat;
+  $("ansichtUebersicht").hidden=zeigEinricht || zeigStat;
 
-  // Knöpfe
+  // Knöpfe freigeben
   const aktiv=z.verbunden && z.bereit;
-  document.querySelectorAll("button[data-cmd], form button[type=submit]").forEach(b=>{
+  document.querySelectorAll("button[data-cmd], form button[type=submit], #btnStatAktualisieren").forEach(b=>{
     if(b.closest("#formBefehl")) return;
     b.disabled=!aktiv;
   });
   $("formBefehl").querySelector("button").disabled=!z.verbunden;
-  const p=$("btnPause");
-  p.textContent = z.pause ? "Weiter" : z.pauseFolgt ? "Pause abbrechen" : "Pause";
+  $("btnPauseT").textContent = z.pause ? "Weiter" : z.pauseFolgt ? "Pause abbrechen" : "Pause";
+  $("btnPauseText").textContent = z.pause ? "Sortieren fortsetzen" : z.pauseFolgt ? "doch weiter sortieren" : "nach der laufenden Kugel";
   $("btnQuittieren").disabled = !aktiv || z.zustand!=="FEHLER";
+  $("btnEinrichtText").textContent = z.einrichtFolgt ? "startet nach der Kugel …" : "Positionen, Farben, Bauteile";
+  $("btnStatistikT").textContent = zeigStat ? "Übersicht" : "Statistik";
+  $("btnStatistikText").textContent = zeigStat ? "zurück zur Übersicht" : "Auswertung öffnen";
+  $("btnStatistik").className = zeigStat ? "b-gut" : "";
   const s=$("btnSummer");
   s.dataset.cmd = z.summer==="aus" ? "ton an" : "ton aus";
   s.textContent = z.summer==="aus" ? "Summer an" : "Summer aus";
@@ -651,14 +868,56 @@ function anzeigen(){
   $("abzBalkenRahmen").hidden = !a.ziel;
   $("abzBalken").style.width = a.ziel ? Math.min(100, a.stand/a.ziel*100)+"%" : "0";
   $("abzText").textContent = a.ziel
-    ? (a.erreicht ? `Ziel erreicht: ${a.ziel}${farbText}. Behälter leeren, dann „Weiter“.` : `${a.stand} von ${a.ziel}${farbText} – danach Pause`)
+    ? (a.erreicht ? `Ziel erreicht: ${a.ziel}${farbText}. Behälter leeren, dann „Weiter“.` : `${a.stand} von ${a.ziel}${farbText}, danach Pause`)
     : "Nach der eingestellten Anzahl macht die Maschine Pause.";
 
   // Einrichtbetrieb
   if(z.auswahl){
     const f=FARBEN.find(f=>f.name===z.auswahl);
-    $("auswahl").innerHTML = `${f?f.text:z.auswahl}: ${z.winkel}°` + (z.ungespeichert?"<small>nicht gespeichert</small>":"");
+    $("auswahl").innerHTML = `${esc(f?f.text:z.auswahl)}: ${z.winkel}°` + (z.ungespeichert?"<small>nicht gespeichert</small>":"");
   }
+
+  if(zeigStat) statistikZeigen();
+}
+
+function statistikZeigen(){
+  const s=z.stat;
+  $("statLeer").hidden=!!s; $("statInhalt").hidden=!s;
+  $("statStand").textContent = s ? `Stand ${z.statZeit}` : "noch keine Daten";
+  if(!s) return;
+  $("stLaufzeit").textContent = dauer(+s.Laufzeit_s||0);
+  $("stKugeln").textContent = z.kugeln ?? s.Kugeln;
+  $("stZyklus").textContent = s.Zyklus_s ? s.Zyklus_s+" s" : "–";
+  $("stTempo").textContent = s.Kugeln_pro_min || "–";
+
+  // Verteilung (Zähler laufen live mit)
+  const werte=FARBEN.map((f,i)=> z.anzahl[i] ?? (+s[f.name]||0));
+  const summe=werte.reduce((x,y)=>x+y,0), max=Math.max(1,...werte);
+  $("stFarben").innerHTML = FARBEN.map((f,i)=>{
+    const proz = summe ? Math.round(werte[i]/summe*100)+" %" : "–";
+    return `<div class="sf" title="${f.text}: ${werte[i]} Kugeln (${proz})">
+      <span class="sf-name"><span class="swatch" style="background:${f.farbe}"></span>${f.text}</span>
+      <span class="sf-balken"><i style="width:${werte[i]/max*100}%;background:${f.farbe}"></i></span>
+      <b>${werte[i]}</b><span class="sf-proz">${proz}</span></div>`;
+  }).join("");
+
+  const zeile=(name,wert,leer)=>`<tr class="${leer?"null":"markiert"}"><td>${esc(name)}</td><td>${esc(wert)}</td></tr>`;
+  const n=k=>+s[k]||0;
+  $("stAblauf").innerHTML =
+    zeile("Neu gemessen", `${n("Neu_gemessen")} Kugeln (${n("Zusatzversuche")} Versuche)`, !n("Neu_gemessen")) +
+    zeile("Schritt 1 nachgedreht", `${n("Nachgedreht")} (${n("Verspaetet_gefallen")}× verspätet gefallen)`, !n("Nachgedreht")) +
+    zeile("Rad gerüttelt", `${n("Ruetteln_Rad")} (${n("Ruetteln_Rad_ok")} erfolgreich)`, !n("Ruetteln_Rad")) +
+    zeile("Schranke gerüttelt", `${n("Ruetteln_Schranke")} (${n("Ruetteln_Schranke_ok")} erfolgreich)`, !n("Ruetteln_Schranke")) +
+    zeile("Trichter gerüttelt", `${n("Ruetteln_Trichter")} (danach ${n("Trichter_ok")}× Kugel)`, !n("Ruetteln_Trichter")) +
+    zeile("Rad nachzentriert", `${n("Nachzentriert")}× (max. ${n("Groesste_Korrektur")} Schritte)`, !n("Nachzentriert")) +
+    zeile("Doppelte Kugel?", String(n("Doppelt")), !n("Doppelt"));
+  $("stFehler").innerHTML = z.statFehler.length
+    ? z.statFehler.map(f=>zeile(f.name, f.anzahl+"×", !f.anzahl)).join("")
+    : zeile("Keine Daten", "–", true);
+  const hell=zahl(s.Helligkeit);
+  $("stSensor").innerHTML =
+    zeile("Helligkeit (Mittel)", isNaN(hell) ? "–" : hell.toFixed(3).replace(".",","), false) +
+    zeile("Zustand", isNaN(hell) ? "–" : hell>1.04 ? "reinigen!" : "in Ordnung", !(hell>1.04));
 }
 
 let meldungTimer=null;
@@ -667,7 +926,7 @@ function meldung(t){
   clearTimeout(meldungTimer); meldungTimer=setTimeout(()=>{ m.hidden=true; },8000);
 }
 
-// ---------- Protokoll ----------
+// ================= Protokoll =================
 function jetzt(){ const d=new Date(); return d.toTimeString().slice(0,8)+"."+String(d.getMilliseconds()).padStart(3,"0"); }
 function logHinzu(text, klasse){
   const zeit=jetzt();
@@ -695,7 +954,28 @@ function logSpeichern(){
   setTimeout(()=>URL.revokeObjectURL(a.href),5000);
 }
 
+// ================= Vorschau ohne Maschine: Bedienung.html?demo (&ansicht=statistik|einricht, &thema=mint ...) =================
+function demo(){
+  const p=new URLSearchParams(location.search);
+  z.verbunden=true; z.bereit=true;
+  [
+    "Programm: Sortiermaschine13",
+    "=== Status ===", "Programm:      Sortiermaschine13", "Zustand:       SCHRITT_2", "Kugeln:        45, Tempo 23.9/min",
+    "Abzaehlen:     7/10 Blau", "Summer:        an",
+    "CSV_Kopf;Programm;Laufzeit_s;Kugeln;Schwarz;Blau;Gelb;Gruen;Lila;Weiss;Rot;Zyklus_s;Kugeln_pro_min;Neu_gemessen;Zusatzversuche;Nachgedreht;Verspaetet_gefallen;Ruetteln_Rad;Ruetteln_Rad_ok;Ruetteln_Schranke;Ruetteln_Schranke_ok;Nachzentriert;Groesste_Korrektur;Ruetteln_Trichter;Trichter_ok;Doppelt;Farbe unbekannt;Sensor reinigen?;Kugel kam nicht;Kugel klemmt;Magazin leer;Farbsensor fehlt;Kugel im Rad?;LS1 pruefen;Radsuche fehlg.;Helligkeit",
+    "CSV;Sortiermaschine13;1245;45;0;2;11;12;13;7;0;2,51;23,9;3;4;2;1;1;1;0;0;6;9;12;10;0;0;0;1;0;1;0;0;0;0;1,004",
+    "Kugel 45: Lila, Zyklus 2.44 s, Schnitt 23.9 Kugeln/min",
+  ].forEach(t=>{ logZeile(t); verarbeiten(t); });
+  z.anzahl[4]=13;
+  if(p.get("ansicht")==="statistik") ansicht="statistik";
+  if(p.get("ansicht")==="einricht"){ verarbeiten("=== Einrichtbetrieb ==="); verarbeiten("Gruen: 96 Grad (nicht gespeichert)"); lsZeigen("belegt","frei"); }
+  if(p.get("ansicht")==="fehler"){ verarbeiten("Neuer Zustand: FEHLER"); verarbeiten("Timeout Schritt 1"); }
+  if(p.get("thema")) document.documentElement.dataset.thema=p.get("thema");
+  anzeigen();
+}
+
 aufbauen();
+if(new URLSearchParams(location.search).has("demo")) demo();
 </script>
 </body>
 </html>
