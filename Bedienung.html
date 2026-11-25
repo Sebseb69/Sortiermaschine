@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f6feb">
+<title>Sortiermaschine</title>
+<!--
+  Bedienoberfläche der Sortiermaschine über Bluetooth (DX-BT24, Web Bluetooth).
+  Jeder Knopf schickt einen der normalen Befehle aus dem seriellen Monitor.
+  Angezeigt wird, was der Arduino ohnehin ausgibt (Zustände, Kugeln, Abzählen ...).
+
+  Öffnen:
+    PC:    tools\Bedienung.bat (startet einen kleinen Server auf localhost und Edge)
+    Handy: Chrome (Android), Seite über https öffnen (z. B. GitHub Pages)
+  Eine per Doppelklick geöffnete Datei (file://) darf kein Bluetooth benutzen.
+-->
+<style>
+:root{
+  --bg:#f3f4f6; --karte:#ffffff; --text:#15181d; --leise:#5b636f; --rand:#dde1e7;
+  --knopf:#eceff3; --knopf-hover:#e1e5eb; --knopf-text:#15181d;
+  --akzent:#1f6feb; --akzent-text:#ffffff;
+  --gruen:#1a8f4c; --gelb:#b97c00; --rot:#c93434; --lila:#7445c4; --grau:#7a828e;
+  --log-bg:#101318; --log-text:#cdd5df; --log-leise:#7d8794; --log-befehl:#7fb4ff;
+  --schatten:0 1px 2px rgba(0,0,0,.06), 0 2px 8px rgba(0,0,0,.04);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0f1114; --karte:#181b20; --text:#e8ebef; --leise:#9aa3ae; --rand:#2a2f37;
+    --knopf:#232831; --knopf-hover:#2c323d; --knopf-text:#e8ebef;
+    --akzent:#3b82f6; --akzent-text:#ffffff;
+    --gruen:#34c26f; --gelb:#e0a52a; --rot:#ef5b5b; --lila:#a07cf0; --grau:#8a929c;
+    --log-bg:#0b0d10; --schatten:none;
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--bg); color:var(--text);
+  font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  padding:0 16px calc(24px + env(safe-area-inset-bottom,0px));
+}
+button,input,select{font:inherit;color:inherit}
+[hidden]{display:none!important}
+
+/* Kopfzeile */
+.kopf{
+  position:sticky; top:0; z-index:5;
+  display:flex; align-items:center; gap:12px;
+  margin:0 -16px 12px; padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;
+  background:var(--bg); border-bottom:1px solid var(--rand);
+}
+.kopf h1{font-size:18px; margin:0; font-weight:650; letter-spacing:-.01em}
+.kopf .titel{flex:1; min-width:0}
+.kopf .klein{display:block; color:var(--leise); font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+
+/* Raster: Handy eine Spalte, breiter zwei */
+main{display:grid; gap:12px; max-width:1100px; margin:0 auto}
+@media (min-width:860px){
+  main{grid-template-columns:minmax(0,1fr) minmax(0,1fr); align-items:start}
+  .spalte{display:grid; gap:12px}
+}
+.spalte{display:grid; gap:12px; min-width:0}
+
+.karte{
+  background:var(--karte); border:1px solid var(--rand); border-radius:12px;
+  padding:14px; box-shadow:var(--schatten); min-width:0;
+}
+.karte h2{font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--leise); margin:0 0 10px}
+
+/* Knöpfe */
+button{
+  border:1px solid var(--rand); background:var(--knopf); color:var(--knopf-text);
+  border-radius:10px; padding:10px 12px; min-height:44px; cursor:pointer;
+  transition:background .15s, transform .05s; touch-action:manipulation;
+}
+button:hover:not(:disabled){background:var(--knopf-hover)}
+button:active:not(:disabled){transform:scale(.98)}
+button:disabled{opacity:.4; cursor:not-allowed}
+button.primaer{background:var(--akzent); border-color:var(--akzent); color:var(--akzent-text); font-weight:600}
+button.primaer:hover:not(:disabled){filter:brightness(1.08); background:var(--akzent)}
+button.warn{background:var(--rot); border-color:var(--rot); color:#fff; font-weight:600}
+button.warn:hover:not(:disabled){filter:brightness(1.08); background:var(--rot)}
+button.sicher{background:var(--gelb); border-color:var(--gelb); color:#fff}
+button.gross{min-height:64px; font-size:17px}
+.knopfreihe{display:flex; flex-wrap:wrap; gap:8px}
+.knopfreihe > *{flex:1 1 140px}
+.raster{display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:8px}
+
+/* Zustand */
+.zustand{border-left:6px solid var(--grau)}
+.zustand[data-art="laeuft"]{border-left-color:var(--gruen)}
+.zustand[data-art="pause"]{border-left-color:var(--gelb)}
+.zustand[data-art="fehler"]{border-left-color:var(--rot)}
+.zustand[data-art="einricht"]{border-left-color:var(--lila)}
+.zustand-zeile{display:flex; align-items:center; gap:10px}
+.punkt{width:12px; height:12px; border-radius:50%; background:var(--grau); flex:none}
+.zustand[data-art="laeuft"] .punkt{background:var(--gruen); box-shadow:0 0 0 4px color-mix(in srgb,var(--gruen) 20%,transparent)}
+.zustand[data-art="pause"] .punkt{background:var(--gelb)}
+.zustand[data-art="fehler"] .punkt{background:var(--rot); animation:blinken 1s infinite}
+.zustand[data-art="einricht"] .punkt{background:var(--lila)}
+@keyframes blinken{50%{opacity:.25}}
+#zustandText{font-size:22px; font-weight:650; letter-spacing:-.01em}
+#zustandDetail{color:var(--leise); margin-top:2px}
+.meldung{margin-top:10px; padding:8px 10px; border-radius:8px; background:var(--knopf); font-size:14px; overflow-wrap:anywhere}
+
+/* Kennzahlen */
+.kennzahlen{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px}
+.zahl{background:var(--knopf); border-radius:10px; padding:10px; min-width:0}
+.zahl b{display:block; font-size:26px; font-weight:650; font-variant-numeric:tabular-nums; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.zahl span{color:var(--leise); font-size:12px}
+
+/* Farben */
+.farben{display:grid; grid-template-columns:repeat(auto-fill,minmax(96px,1fr)); gap:8px}
+.farbe{display:grid; grid-template-columns:16px minmax(0,1fr); column-gap:6px; row-gap:2px; align-items:center; background:var(--knopf); border-radius:10px; padding:8px 10px; min-width:0}
+.farbe i{width:16px; height:16px; border-radius:50%; border:1px solid rgba(127,127,127,.5)}
+.farbe span{font-size:13px; color:var(--leise); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.farbe b{grid-column:1 / -1; font-variant-numeric:tabular-nums; font-size:22px; line-height:1.1}
+
+/* Formularzeilen */
+.zeile{display:flex; flex-wrap:wrap; gap:8px; align-items:stretch}
+.zeile input,.zeile select{
+  flex:1 1 90px; min-width:0; min-height:44px; padding:8px 10px;
+  border:1px solid var(--rand); border-radius:10px; background:var(--karte);
+}
+.zeile button{flex:0 1 auto}
+.zeile select{flex-basis:140px}
+.fortschritt{height:8px; border-radius:4px; background:var(--knopf); overflow:hidden; margin-top:10px}
+.fortschritt > div{height:100%; width:0; background:var(--akzent); transition:width .3s}
+.leise{color:var(--leise); font-size:13px}
+.abstand{margin-top:10px}
+
+/* Einrichtbetrieb */
+.auswahl{font-size:20px; font-weight:650}
+.auswahl small{font-size:13px; font-weight:400; color:var(--gelb); margin-left:6px}
+.behaelter button{display:flex; align-items:center; justify-content:center; gap:6px}
+.behaelter i{width:12px; height:12px; border-radius:50%; border:1px solid rgba(127,127,127,.5)}
+.ls{display:flex; gap:8px}
+.ls div{flex:1; text-align:center; padding:10px; border-radius:10px; background:var(--knopf); font-weight:600}
+.ls div.belegt{background:var(--akzent); color:#fff}
+
+/* Protokoll */
+#log{
+  background:var(--log-bg); color:var(--log-text); border-radius:8px;
+  font:12px/1.45 ui-monospace,Consolas,"Cascadia Mono",Menlo,monospace;
+  height:300px; overflow:auto; padding:8px 10px; white-space:pre-wrap; overflow-wrap:anywhere;
+}
+#log .z{color:var(--log-leise)}
+#log .befehl{color:var(--log-befehl)}
+#log .info{color:#e0b35a}
+.hinweis{max-width:1100px; margin:0 auto 12px; padding:12px 14px; border-radius:10px; background:color-mix(in srgb,var(--rot) 14%,var(--karte)); border:1px solid var(--rot)}
+</style>
+</head>
+<body>
+
+<header class="kopf">
+  <div class="titel">
+    <h1>Sortiermaschine</h1>
+    <span class="klein" id="kopfInfo">Nicht verbunden</span>
+  </div>
+  <button id="btnVerbinden" class="primaer">Verbinden</button>
+</header>
+
+<div id="hinweis" class="hinweis" hidden></div>
+
+<main>
+  <div class="spalte">
+    <section class="karte zustand" id="zustandKarte" data-art="getrennt">
+      <div class="zustand-zeile"><span class="punkt"></span><span id="zustandText">Nicht verbunden</span></div>
+      <div id="zustandDetail">Oben auf „Verbinden“ tippen und „Sortiermaschine“ wählen.</div>
+      <div id="meldung" class="meldung" hidden></div>
+    </section>
+
+    <!-- Normalbetrieb -->
+    <div id="normal" class="spalte">
+      <section class="knopfreihe">
+        <button id="btnPause" class="gross primaer" data-cmd="p">Pause</button>
+        <button id="btnQuittieren" class="gross warn" data-cmd="q" disabled>Fehler quittieren</button>
+      </section>
+
+      <section class="karte">
+        <div class="kennzahlen">
+          <div class="zahl"><b id="kugeln">–</b><span>Kugeln</span></div>
+          <div class="zahl"><b id="tempo">–</b><span>pro Minute</span></div>
+          <div class="zahl"><b id="abzKurz">aus</b><span>Abzählen</span></div>
+        </div>
+      </section>
+
+      <section class="karte">
+        <h2>Kugeln je Farbe</h2>
+        <div class="farben" id="farben"></div>
+      </section>
+    </div>
+
+    <!-- Einrichtbetrieb -->
+    <div id="einricht" class="spalte" hidden>
+      <section class="karte">
+        <h2>Position einstellen</h2>
+        <div class="auswahl" id="auswahl">–</div>
+        <div class="raster behaelter abstand" id="behaelter"></div>
+        <div class="knopfreihe abstand">
+          <button data-cmd="z">Schranke zu</button>
+          <button data-cmd="a">Schranke auf</button>
+        </div>
+        <div class="knopfreihe abstand">
+          <button data-cmd="--">−5°</button>
+          <button data-cmd="-">−1°</button>
+          <button data-cmd="+">+1°</button>
+          <button data-cmd="++">+5°</button>
+        </div>
+        <form class="zeile abstand" id="formWinkel">
+          <input id="winkel" type="number" min="0" max="180" inputmode="numeric" placeholder="Winkel 0–180">
+          <button type="submit">Winkel setzen</button>
+        </form>
+        <div class="knopfreihe abstand">
+          <button class="primaer" data-cmd="s">Speichern</button>
+          <button data-cmd="l">Liste</button>
+          <button data-cmd="r" data-sicher>Standardpositionen</button>
+        </div>
+      </section>
+
+      <section class="karte">
+        <h2>Farbsensor</h2>
+        <div class="knopfreihe">
+          <button data-cmd="m">Testmessung</button>
+        </div>
+        <form class="zeile abstand" id="formLernen">
+          <select id="lernFarbe"></select>
+          <button type="submit">Kugel einlernen</button>
+        </form>
+        <div class="knopfreihe abstand">
+          <button data-cmd="rk" data-sicher>Farbwerte aus dem Code</button>
+        </div>
+        <p class="leise">Einlernen: Kugel an die Schranke legen, Farbe wählen, danach „Speichern“.</p>
+      </section>
+
+      <section class="karte">
+        <h2>Lichtschranken</h2>
+        <div class="ls"><div id="ls1">LS1 ?</div><div id="ls2">LS2 ?</div></div>
+        <div class="knopfreihe abstand">
+          <button data-cmd="ls" id="btnLsLive">Live-Anzeige an</button>
+        </div>
+      </section>
+
+      <section class="karte">
+        <h2>Rad und Summer</h2>
+        <div class="raster">
+          <button data-cmd="d">Viertelumdrehung</button>
+          <button data-cmd="v">Rütteln kurz</button>
+          <button data-cmd="v 25">Rütteln lang</button>
+          <button data-cmd="rs">Radsuche</button>
+          <button data-cmd="t">Summer testen</button>
+        </div>
+        <form class="zeile abstand" id="formSchritte">
+          <input id="schritte" type="number" min="-400" max="400" inputmode="numeric" placeholder="Schritte (−400…400)">
+          <button type="submit">Drehen</button>
+        </form>
+      </section>
+
+      <section class="knopfreihe">
+        <button class="gross primaer" data-cmd="x">Einrichten beenden</button>
+      </section>
+    </div>
+  </div>
+
+  <div class="spalte">
+    <section class="karte" id="karteAbz">
+      <h2>Abzählen</h2>
+      <form id="formAbz">
+        <div class="zeile">
+          <input id="abzAnzahl" type="number" min="1" max="999" inputmode="numeric" placeholder="Anzahl">
+          <select id="abzFarbe"><option value="">alle Farben</option></select>
+        </div>
+        <div class="knopfreihe abstand">
+          <button type="submit" class="primaer">Abzählen starten</button>
+          <button type="button" data-cmd="n 0">Aus</button>
+        </div>
+      </form>
+      <div class="fortschritt" id="abzBalkenRahmen" hidden><div id="abzBalken"></div></div>
+      <div class="leise abstand" id="abzText">Nach der eingestellten Anzahl macht die Maschine Pause.</div>
+    </section>
+
+    <section class="karte" id="karteWeitere">
+      <h2>Weitere Befehle</h2>
+      <div class="raster">
+        <button data-cmd="status">Aktualisieren</button>
+        <button data-cmd="i">Statistik</button>
+        <button id="btnSummer" data-cmd="ton aus">Summer aus</button>
+        <button data-cmd="test">Selbsttest</button>
+        <button data-cmd="rs">Radsuche</button>
+        <button data-cmd="e">Einrichtbetrieb</button>
+        <button data-cmd="reset" data-sicher>Zähler auf 0</button>
+        <button data-cmd="neustart" data-sicher>Neustart</button>
+      </div>
+      <p class="leise">Selbsttest und Radsuche nur in Pause oder bei einem Fehler (Kammern leer).</p>
+    </section>
+
+    <section class="karte">
+      <h2>Protokoll</h2>
+      <div id="log" aria-live="polite"></div>
+      <form class="zeile abstand" id="formBefehl">
+        <input id="befehl" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Befehl eintippen (h = Hilfe)">
+        <button type="submit">Senden</button>
+      </form>
+      <div class="knopfreihe abstand">
+        <button type="button" id="btnLogSpeichern">Protokoll speichern</button>
+        <button type="button" id="btnLogLeeren">Leeren</button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+"use strict";
+
+// ---------- Einstellungen ----------
+const DIENST = 0xffe0;        // DX-BT24: Dienst
+const KANAL  = 0xffe1;        // DX-BT24: Daten (Notify + Write)
+const BLOCK  = 20;            // Bytes pro BLE-Paket
+const ARDUINO_BEREIT_MS = 2200;  // der Arduino nimmt Befehle erst ca. 1,5 s nach dem Verbinden an (STATE)
+const LOG_ANZEIGE = 400;      // so viele Zeilen sichtbar
+const LOG_MAX = 50000;        // so viele Zeilen zum Speichern
+
+const FARBEN = [
+  {name:"Schwarz", text:"Schwarz", farbe:"#1d1d1f"},
+  {name:"Blau",    text:"Blau",    farbe:"#2f6fdb"},
+  {name:"Gelb",    text:"Gelb",    farbe:"#f2c230"},
+  {name:"Gruen",   text:"Grün",    farbe:"#2fa84f"},
+  {name:"Lila",    text:"Lila",    farbe:"#8a4fd1"},
+  {name:"Weiss",   text:"Weiß",    farbe:"#f6f6f6"},
+  {name:"Rot",     text:"Rot",     farbe:"#d93a3a"},
+];
+const SCHRITTE = {
+  WARTEN:"wartet auf die nächste Kugel", SCHRITT_1:"Kugel fällt zur Schranke",
+  SCHRITT_2:"misst die Farbe", SCHRITT_3:"Brücke fährt", SCHRITT_4:"Schranke offen",
+  SCHRITT_5:"Schranke schließt", SCHRITT_6:"Schranke schließt", SCHRITT_7:"Schranke schließt",
+  SCHRITT_8:"Schranke schließt", SCHRITT_9:"Schranke schließt", FERTIG:"Kugel sortiert",
+};
+const MELDUNGEN = /^(Kein Fehler aktiv|Kugel liegt noch|Nur in Pause|Unbekannter Befehl|WARNUNG|ACHTUNG|Rohwerte|Gespeichert|Radsuche: |Fehler quittiert|Neustart|Selbsttest wird|Werte schwanken|Kein Signal|Naechste andere Farbe|Farbwerte aus dem Code|Standardwerte geladen|Trichter geruettelt|Rad: |Summer: |Ungueltig|Schrittzahl|Farbnummer|Erst Handy)/;
+
+// ---------- Zustand ----------
+const z = {
+  verbunden:false, bereit:false, zustand:null, pause:false, pauseFolgt:false,
+  fehler:"", einricht:false, einrichtFolgt:false, kugeln:null, tempo:null,
+  anzahl:FARBEN.map(()=>null), abz:{ziel:0, stand:0, farbe:null, erreicht:false},
+  summer:null, programm:"", lsLive:false, auswahl:null, winkel:null, ungespeichert:false,
+};
+let geraet=null, kanal=null, ohneAntwort=false, manuellGetrennt=false;
+let rest="", decoder=new TextDecoder("utf-8");
+let erwarteFehlerGrund=false, imStatus=false, csvKopf=null, modusPruefen=false;
+let schreibKette=Promise.resolve();
+const logZeilen=[];
+
+const $ = id => document.getElementById(id);
+
+// ---------- Aufbau ----------
+function aufbauen(){
+  const farben=$("farben"), beh=$("behaelter"), lern=$("lernFarbe"), abz=$("abzFarbe");
+  FARBEN.forEach((f,i)=>{
+    farben.insertAdjacentHTML("beforeend",
+      `<div class="farbe"><i style="background:${f.farbe}"></i><span>${f.text}</span><b id="anz${i}">–</b></div>`);
+    beh.insertAdjacentHTML("beforeend",
+      `<button data-cmd="${i+1}"><i style="background:${f.farbe}"></i>${f.text}</button>`);
+    lern.insertAdjacentHTML("beforeend", `<option value="${i+1}">${i+1} ${f.text}</option>`);
+    abz.insertAdjacentHTML("beforeend", `<option value="${i+1}">nur ${f.text}</option>`);
+  });
+
+  document.addEventListener("click", e=>{
+    const b=e.target.closest("button[data-cmd]");
+    if(!b || b.disabled) return;
+    if(b.hasAttribute("data-sicher") && !sicherheitsabfrage(b)) return;
+    senden(b.dataset.cmd);
+  });
+  $("btnVerbinden").addEventListener("click", ()=> z.verbunden ? trennen() : verbinden());
+  $("formBefehl").addEventListener("submit", e=>{ e.preventDefault(); const t=$("befehl").value.trim(); if(t){ senden(t); $("befehl").value=""; } });
+  $("formAbz").addEventListener("submit", e=>{
+    e.preventDefault();
+    const n=parseInt($("abzAnzahl").value,10);
+    if(!(n>=1 && n<=999)){ meldung("Anzahl 1–999 eingeben"); return; }
+    const f=$("abzFarbe").value;
+    senden(f ? `n ${n} ${f}` : `n ${n}`);
+  });
+  $("formWinkel").addEventListener("submit", e=>{
+    e.preventDefault();
+    const w=parseInt($("winkel").value,10);
+    if(!(w>=0 && w<=180)){ meldung("Winkel 0–180 eingeben"); return; }
+    senden(`w ${w}`);
+  });
+  $("formSchritte").addEventListener("submit", e=>{
+    e.preventDefault();
+    const s=parseInt($("schritte").value,10);
+    if(!s || Math.abs(s)>400){ meldung("Schritte −400…400 (nicht 0)"); return; }
+    senden(`d ${s}`);
+  });
+  $("formLernen").addEventListener("submit", e=>{ e.preventDefault(); senden(`k ${$("lernFarbe").value}`); });
+  $("btnLogSpeichern").addEventListener("click", logSpeichern);
+  $("btnLogLeeren").addEventListener("click", ()=>{ $("log").textContent=""; });
+
+  if(!navigator.bluetooth){
+    const h=$("hinweis"); h.hidden=false;
+    h.innerHTML = location.protocol==="file:"
+      ? "<b>Bluetooth ist hier gesperrt.</b> Eine doppelt geklickte Datei darf kein Bluetooth benutzen. Am PC bitte <b>tools\\Bedienung.bat</b> starten, am Handy die Seite über https öffnen."
+      : "<b>Dieser Browser kann kein Bluetooth.</b> Am PC Edge oder Chrome benutzen, am Handy Chrome (Android). Firefox und iPhone-Browser können kein Web Bluetooth.";
+    $("btnVerbinden").disabled=true;
+  }
+  anzeigen();
+}
+
+// Gefährliche Knöpfe: erst beim zweiten Tippen innerhalb von 3 s ausführen
+function sicherheitsabfrage(b){
+  if(b.dataset.bestaetigt==="1"){ b.dataset.bestaetigt=""; b.classList.remove("sicher"); b.textContent=b.dataset.text; return true; }
+  b.dataset.text=b.textContent; b.dataset.bestaetigt="1"; b.classList.add("sicher"); b.textContent="Sicher? Nochmal tippen";
+  setTimeout(()=>{ if(b.dataset.bestaetigt==="1"){ b.dataset.bestaetigt=""; b.classList.remove("sicher"); b.textContent=b.dataset.text; } },3000);
+  return false;
+}
+
+// ---------- Bluetooth ----------
+async function verbinden(){
+  try{
+    manuellGetrennt=false;
+    geraet = await navigator.bluetooth.requestDevice({
+      filters:[{namePrefix:"Sortiermaschine"},{name:"BT24"}],
+      optionalServices:[DIENST],
+    });
+    geraet.addEventListener("gattserverdisconnected", verbindungWeg);
+    await gattVerbinden();
+  }catch(e){
+    if(e.name!=="NotFoundError") logInfo("Verbinden fehlgeschlagen: "+e.message);
+    kopfInfo();
+  }
+}
+
+async function gattVerbinden(){
+  $("kopfInfo").textContent="Verbinde …";
+  const server = await geraet.gatt.connect();
+  const dienst = await server.getPrimaryService(DIENST);
+  kanal = await dienst.getCharacteristic(KANAL);
+  ohneAntwort = !!kanal.properties.writeWithoutResponse;
+  kanal.removeEventListener("characteristicvaluechanged", datenEmpfangen);
+  kanal.addEventListener("characteristicvaluechanged", datenEmpfangen);
+  await kanal.startNotifications();
+  z.verbunden=true; z.bereit=false; rest=""; decoder=new TextDecoder("utf-8");
+  logInfo("Verbunden mit "+(geraet.name||"Modul"));
+  wachHalten();
+  anzeigen();
+  // Der Arduino erkennt die Verbindung erst nach ca. 1,5 s (STATE-Pin), vorher ignoriert er Befehle
+  setTimeout(()=>{
+    if(!z.verbunden) return;
+    z.bereit=true; anzeigen();
+    modusPruefen=true; senden("h", true);   // Antwort zeigt, ob Normal- oder Einrichtbetrieb
+    setTimeout(()=>{ if(modusPruefen && z.verbunden) senden("h", true); }, 3000);   // keine Antwort: einmal wiederholen
+  }, ARDUINO_BEREIT_MS);
+}
+
+function trennen(){
+  manuellGetrennt=true;
+  if(geraet && geraet.gatt.connected) geraet.gatt.disconnect();
+  else verbindungWeg();
+}
+
+async function verbindungWeg(){
+  const warVerbunden=z.verbunden;
+  z.verbunden=false; z.bereit=false; kanal=null;
+  anzeigen();
+  if(warVerbunden) logInfo("Verbindung getrennt");
+  if(manuellGetrennt || !geraet) return;
+  for(let versuch=1; versuch<=10 && !manuellGetrennt; versuch++){   // automatisch neu verbinden
+    $("kopfInfo").textContent=`Verbindung weg, neuer Versuch ${versuch} …`;
+    await new Promise(r=>setTimeout(r,2000));
+    try{ await gattVerbinden(); return; }catch(e){ /* weiter versuchen */ }
+  }
+  kopfInfo();
+}
+
+let wachSperre=null;
+async function wachHalten(){   // Handy-Bildschirm nicht ausgehen lassen, solange verbunden
+  try{ if("wakeLock" in navigator && !wachSperre){ wachSperre=await navigator.wakeLock.request("screen"); wachSperre.addEventListener("release",()=>{wachSperre=null;}); } }catch(e){}
+}
+document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="visible" && z.verbunden) wachHalten(); });
+
+function senden(text, still){
+  if(!kanal || !z.verbunden){ meldung("Nicht verbunden"); return; }
+  if(!z.bereit && !still){ meldung("Einen Moment, Verbindung wird aufgebaut …"); return; }
+  logBefehl(text);
+  const daten=new TextEncoder().encode(text+"\n");
+  schreibKette = schreibKette.then(async ()=>{
+    for(let i=0;i<daten.length;i+=BLOCK){
+      const teil=daten.slice(i,i+BLOCK);
+      if(ohneAntwort && kanal.writeValueWithoutResponse) await kanal.writeValueWithoutResponse(teil);
+      else await kanal.writeValue(teil);
+    }
+  }).catch(e=>logInfo("Senden fehlgeschlagen: "+e.message));
+}
+
+function datenEmpfangen(e){
+  rest += decoder.decode(e.target.value, {stream:true});
+  let pos;
+  while((pos=rest.indexOf("\n"))>=0){
+    const zeile=rest.slice(0,pos).replace(/\r$/,"");
+    rest=rest.slice(pos+1);
+    logZeile(zeile);
+    verarbeiten(zeile);
+  }
+  anzeigen();
+}
+
+// ---------- Ausgaben des Arduino auswerten ----------
+function farbIndex(name){ return FARBEN.findIndex(f=>f.name===name); }
+function zahl(t){ return parseFloat(String(t).replace(",", ".")); }
+
+function verarbeiten(t){
+  let m;
+  if(erwarteFehlerGrund){ erwarteFehlerGrund=false; z.fehler=t; return; }   // Zeile nach "Neuer Zustand: FEHLER"
+
+  if(t==="=== Status ==="){ imStatus=true; return; }
+  if(imStatus){
+    if((m=t.match(/^Zustand:\s+(\w+)(.*)$/))){
+      z.zustand=m[1]; z.pause=m[2].includes("(PAUSE)"); z.pauseFolgt=m[2].includes("Pause angefordert");
+      z.einrichtFolgt=m[2].includes("Einrichtbetrieb angefordert");
+      if(z.zustand!=="FEHLER") z.fehler="";
+    }
+    else if((m=t.match(/^Fehler:\s+(.+)$/))) z.fehler=m[1];
+    else if((m=t.match(/^Kugeln:\s+(\d+)(?:, Tempo ([\d.]+)\/min)?/))){ z.kugeln=+m[1]; if(m[2]) z.tempo=zahl(m[2]); }
+    else if((m=t.match(/^Abzaehlen:\s+aus/))) z.abz.ziel=0;
+    else if((m=t.match(/^Abzaehlen:\s+(\d+)\/(\d+)(?: (\w+))?/))){ z.abz.stand=+m[1]; z.abz.ziel=+m[2]; z.abz.farbe=m[3]||null; }
+    else if((m=t.match(/^Programm:\s+(\S+)/))) z.programm=m[1];
+    else if((m=t.match(/^Summer:\s+(an|aus)/))){ z.summer=m[1]; imStatus=false; }
+    return;
+  }
+
+  if((m=t.match(/^Neuer Zustand: (\w+)/))){
+    z.zustand=m[1];
+    if(m[1]==="FEHLER") erwarteFehlerGrund=true; else z.fehler="";
+    if(m[1]==="WARTEN") z.einricht=false;
+    return;
+  }
+  if((m=t.match(/^Kugel (\d+): (\w+)(?:, Zyklus [\d.]+ s, Schnitt ([\d.]+))?/))){
+    z.kugeln=+m[1]; const i=farbIndex(m[2]);
+    if(i>=0) z.anzahl[i]=(z.anzahl[i]||0)+1;
+    if(m[3]) z.tempo=zahl(m[3]);
+    return;
+  }
+  if(t.startsWith("Pause angefordert")){ z.pauseFolgt=true; return; }
+  if(t==="Pause"){ z.pause=true; z.pauseFolgt=false; return; }
+  if(t.startsWith("Pause beendet")){ z.pause=false; return; }
+  if(t.startsWith("Pause abgebrochen")){ z.pauseFolgt=false; return; }
+  if(t.startsWith("Zaehler und Statistik zurueckgesetzt") || t.startsWith("Neustart...") || t.startsWith("Programm:")){
+    z.kugeln=0; z.tempo=null; z.anzahl=FARBEN.map(()=>0); z.abz.stand=0; z.abz.erreicht=false;
+    if((m=t.match(/^Programm:\s+(\S+)/))){ z.programm=m[1]; z.abz.ziel=0; z.pause=false; z.pauseFolgt=false; z.einricht=false; }
+    if(t.startsWith("Neustart")) meldung("Arduino startet neu …");
+    return;
+  }
+  if(t.startsWith("Abzaehlen")){
+    if(/Abzaehlen aus|^Abzaehlen:\s+aus/.test(t)) { z.abz.ziel=0; z.abz.erreicht=false; }
+    else if(t.includes("Ziel erreicht")) { z.abz.erreicht=true; meldung("Abzählziel erreicht – Behälter leeren, dann „Weiter“"); }
+    else if((m=t.match(/Pause nach (\d+) Kugeln(?: der Farbe (\w+))?/))){ z.abz={ziel:+m[1], stand:0, farbe:m[2]||null, erreicht:false}; }
+    else if((m=t.match(/(\d+)\/(\d+)(?: (\w+))?/))){ z.abz.stand=+m[1]; z.abz.ziel=+m[2]; z.abz.farbe=m[3]||null; if(t.startsWith("Abzaehlen neu")) z.abz.erreicht=false; }
+    return;
+  }
+  if(t.startsWith("CSV_Kopf;")){ csvKopf=t.split(";"); return; }
+  if(t.startsWith("CSV;") && csvKopf){
+    const w=t.split(";"), spalte=n=>w[csvKopf.indexOf(n)];
+    if(csvKopf.includes("Kugeln")) z.kugeln=+spalte("Kugeln");
+    FARBEN.forEach((f,i)=>{ if(csvKopf.includes(f.name)) z.anzahl[i]=+spalte(f.name); });
+    const kpm=spalte("Kugeln_pro_min"); if(kpm) z.tempo=zahl(kpm);
+    if(w[1]) z.programm=w[1];
+    return;
+  }
+  if(t==="=== Einrichtbetrieb ==="){
+    z.einricht=true; z.einrichtFolgt=false;
+    if(modusPruefen){ modusPruefen=false; senden("l", true); }
+    return;
+  }
+  if(t==="=== Befehle ==="){
+    z.einricht=false;
+    if(modusPruefen){ modusPruefen=false; senden("status", true); senden("csv", true); }
+    return;
+  }
+  if(t.startsWith("Einrichtbetrieb beendet")){ z.einricht=false; z.lsLive=false; return; }
+  if(t.startsWith("Einrichtbetrieb startet")){ z.einrichtFolgt=true; return; }
+  if((m=t.match(/^Summer (an|aus)/))){ z.summer=m[1]; return; }
+  if(t.startsWith("Lichtschranken live")){ z.lsLive=true; return; }
+  if(t.startsWith("Lichtschranken-Anzeige aus")){ z.lsLive=false; return; }
+  if((m=t.match(/LS1[^:]*:\s*(belegt|frei).*LS2[^:]*:\s*(belegt|frei)/))){ lsZeigen(m[1],m[2]); return; }
+  if((m=t.match(/^(Schwarz|Blau|Gelb|Gruen|Lila|Weiss|Rot|Schranke zu|Schranke auf): (\d+) Grad( \(nicht gespeichert\))?/))){
+    z.auswahl=m[1]; z.winkel=+m[2]; z.ungespeichert=!!m[3]; return;
+  }
+  if(t.startsWith("Gespeichert")) z.ungespeichert=false;
+  if(MELDUNGEN.test(t)) meldung(t);
+}
+
+function lsZeigen(a,b){
+  $("ls1").textContent="LS1 "+a; $("ls1").className=a==="belegt"?"belegt":"";
+  $("ls2").textContent="LS2 "+b; $("ls2").className=b==="belegt"?"belegt":"";
+}
+
+// ---------- Anzeige ----------
+function kopfInfo(){
+  $("kopfInfo").textContent = z.verbunden
+    ? (z.bereit ? "Verbunden" : "Verbinde …") + (z.programm ? " · "+z.programm : "")
+    : "Nicht verbunden";
+}
+
+function anzeigen(){
+  kopfInfo();
+  const btn=$("btnVerbinden");
+  btn.textContent = z.verbunden ? "Trennen" : "Verbinden";
+  btn.classList.toggle("primaer", !z.verbunden);
+
+  // Zustand
+  let art="getrennt", text="Nicht verbunden", detail="Oben auf „Verbinden“ tippen und „Sortiermaschine“ wählen.";
+  if(z.verbunden){
+    if(z.einricht){ art="einricht"; text="Einrichtbetrieb"; detail="Positionen einstellen, Farben einlernen, Bauteile testen"; }
+    else if(z.zustand==="FEHLER"){ art="fehler"; text=z.fehler||"Fehler"; detail="Ursache beheben, dann „Fehler quittieren“"; }
+    else if(z.pause){ art="pause"; text=z.abz.erreicht?"Ziel erreicht":"Pause"; detail=z.abz.erreicht?"Behälter leeren, dann „Weiter“":"„Weiter“ setzt das Sortieren fort"; }
+    else if(z.zustand){ art="laeuft"; text=z.pauseFolgt?"Pause folgt …":"Sortiert"; detail=SCHRITTE[z.zustand]||z.zustand; }
+    else { text="Verbunden"; detail="Zustand wird abgefragt …"; }
+    if(z.einrichtFolgt && !z.einricht) detail="Einrichtbetrieb startet, sobald die Kugel sortiert ist";
+  }
+  $("zustandKarte").dataset.art=art; $("zustandText").textContent=text; $("zustandDetail").textContent=detail;
+
+  // Bereiche
+  $("normal").hidden=z.einricht; $("einricht").hidden=!z.einricht;
+  $("karteAbz").hidden=z.einricht; $("karteWeitere").hidden=z.einricht;
+
+  // Knöpfe
+  const aktiv=z.verbunden && z.bereit;
+  document.querySelectorAll("button[data-cmd], form button[type=submit]").forEach(b=>{
+    if(b.closest("#formBefehl")) return;
+    b.disabled=!aktiv;
+  });
+  $("formBefehl").querySelector("button").disabled=!z.verbunden;
+  const p=$("btnPause");
+  p.textContent = z.pause ? "Weiter" : z.pauseFolgt ? "Pause abbrechen" : "Pause";
+  $("btnQuittieren").disabled = !aktiv || z.zustand!=="FEHLER";
+  const s=$("btnSummer");
+  s.dataset.cmd = z.summer==="aus" ? "ton an" : "ton aus";
+  s.textContent = z.summer==="aus" ? "Summer an" : "Summer aus";
+  $("btnLsLive").textContent = z.lsLive ? "Live-Anzeige aus" : "Live-Anzeige an";
+
+  // Zahlen
+  $("kugeln").textContent = z.kugeln==null ? "–" : z.kugeln;
+  $("tempo").textContent = z.tempo==null ? "–" : z.tempo.toFixed(1).replace(".",",");
+  FARBEN.forEach((f,i)=>{ $("anz"+i).textContent = z.anzahl[i]==null ? "–" : z.anzahl[i]; });
+
+  // Abzählen
+  const a=z.abz, farbText=a.farbe ? " "+(FARBEN[farbIndex(a.farbe)]||{text:a.farbe}).text : "";
+  $("abzKurz").textContent = a.ziel ? `${a.stand}/${a.ziel}` : "aus";
+  $("abzBalkenRahmen").hidden = !a.ziel;
+  $("abzBalken").style.width = a.ziel ? Math.min(100, a.stand/a.ziel*100)+"%" : "0";
+  $("abzText").textContent = a.ziel
+    ? (a.erreicht ? `Ziel erreicht: ${a.ziel}${farbText}. Behälter leeren, dann „Weiter“.` : `${a.stand} von ${a.ziel}${farbText} – danach Pause`)
+    : "Nach der eingestellten Anzahl macht die Maschine Pause.";
+
+  // Einrichtbetrieb
+  if(z.auswahl){
+    const f=FARBEN.find(f=>f.name===z.auswahl);
+    $("auswahl").innerHTML = `${f?f.text:z.auswahl}: ${z.winkel}°` + (z.ungespeichert?"<small>nicht gespeichert</small>":"");
+  }
+}
+
+let meldungTimer=null;
+function meldung(t){
+  const m=$("meldung"); m.textContent=t; m.hidden=false;
+  clearTimeout(meldungTimer); meldungTimer=setTimeout(()=>{ m.hidden=true; },8000);
+}
+
+// ---------- Protokoll ----------
+function jetzt(){ const d=new Date(); return d.toTimeString().slice(0,8)+"."+String(d.getMilliseconds()).padStart(3,"0"); }
+function logHinzu(text, klasse){
+  const zeit=jetzt();
+  logZeilen.push(`${zeit} ${klasse==="befehl"?"<":">"} ${text}`);
+  if(logZeilen.length>LOG_MAX) logZeilen.shift();
+  const log=$("log"), unten=log.scrollHeight-log.scrollTop-log.clientHeight<30;
+  const div=document.createElement("div");
+  if(klasse) div.className=klasse;
+  const zs=document.createElement("span"); zs.className="z"; zs.textContent=zeit.slice(0,8)+" ";
+  div.append(zs, document.createTextNode(text));
+  log.append(div);
+  while(log.childElementCount>LOG_ANZEIGE) log.firstElementChild.remove();
+  if(unten) log.scrollTop=log.scrollHeight;
+}
+function logZeile(t){ logHinzu(t); }
+function logBefehl(t){ logHinzu("> "+t, "befehl"); }
+function logInfo(t){ logHinzu("--- "+t, "info"); }
+
+function logSpeichern(){
+  const d=new Date(), p=n=>String(n).padStart(2,"0");
+  const name=`bt-bedienung-${String(d.getFullYear()).slice(2)}${p(d.getMonth()+1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.log`;
+  const blob=new Blob([logZeilen.join("\n")+"\n"],{type:"text/plain"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+}
+
+aufbauen();
+</script>
+</body>
+</html>
