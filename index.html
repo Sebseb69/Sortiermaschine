@@ -734,6 +734,13 @@ body{font-family:var(--schrift, Manrope),"Segoe UI",system-ui,-apple-system,Robo
 [data-groesse="klein"] body{zoom:.9}
 [data-groesse="gross"] body{zoom:1.12}
 
+/* ================= Hilfe ================= */
+.hilfe dt{white-space:normal; max-width:110px}
+.hilfe-liste{margin:0; padding-left:20px; display:flex; flex-direction:column; gap:6px; font-size:14px; line-height:1.45}
+.hilfe-liste li::marker{font-weight:800; color:var(--akzent-dunkel)}
+#hilfeFehler dt{font-size:13px; font-weight:800; color:var(--fehler-text)}
+#hilfeFehler dd{font-weight:500}
+
 /* ================= Tastenkürzel ================= */
 @media (hover:none),(pointer:coarse){ .nur-pc{display:none!important} }
 .tasten{display:flex; flex-direction:column; gap:6px}
@@ -802,6 +809,7 @@ kbd{display:inline-block; min-width:26px; padding:3px 7px; border-radius:7px; ba
   <symbol id="i-schliessen" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
   <symbol id="i-messen" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/></symbol>
   <symbol id="i-zu" viewBox="0 0 24 24"><path d="M4 12h16M4 6v12M20 6v12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+  <symbol id="i-hilfe" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.7"/><path d="M12 17h.01"/></g></symbol>
   <symbol id="i-tasten" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6.5 10h.01M10 10h.01M13.5 10h.01M17 10h.01M8 14h8"/></g></symbol>
   <symbol id="i-auf" viewBox="0 0 24 24"><path d="M4 12l6-6M4 6v12M20 6v12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
 </svg>
@@ -921,6 +929,12 @@ kbd{display:inline-block; min-width:26px; padding:3px 7px; border-radius:7px; ba
         <button class="menue-eintrag" data-cmd="e">
           <span class="symbolkachel sk-braun"><svg class="ic-gross"><use href="#i-regler"/></svg></span>
           <span class="t"><b>Einrichtbetrieb</b><span id="einrichtUnter">Positionen, Farben einlernen, Tests</span></span>
+          <svg class="ic"><use href="#i-rechts"/></svg>
+        </button>
+        <div class="trenner"></div>
+        <button class="menue-eintrag" id="btnHilfe">
+          <span class="symbolkachel sk-blau"><svg class="ic-gross"><use href="#i-hilfe"/></svg></span>
+          <span class="t"><b>Hilfe &amp; Bedienung</b><span>Start, Knopf am Gerät, Fehler und was zu tun ist</span></span>
           <svg class="ic"><use href="#i-rechts"/></svg>
         </button>
       </nav>
@@ -1328,6 +1342,59 @@ kbd{display:inline-block; min-width:26px; padding:3px 7px; border-radius:7px; ba
     <div class="gitter2">
       <button type="button" class="k-mittel k-weich" id="btnAssistent">Assistent starten</button>
       <button type="button" class="k-mittel k-akzent" data-cmd="s">Speichern</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- ================= Hilfe & Bedienung ================= -->
+<dialog class="sheet breit" id="dlgHilfe" aria-labelledby="dlgHilfeTitel">
+  <div class="sheet-inhalt">
+    <span class="griff" aria-hidden="true"></span>
+    <div class="sheet-kopf">
+      <div>
+        <h2 id="dlgHilfeTitel">Hilfe &amp; Bedienung</h2>
+        <p>Das Wichtigste auf einen Blick. Ausführlich steht alles in der Dokumentation im Projektordner.</p>
+      </div>
+      <button type="button" class="k-symbol" id="btnHilfeZu" aria-label="Schließen"><svg class="ic"><use href="#i-schliessen"/></svg></button>
+    </div>
+    <div class="tasten hilfe">
+      <h3>So startest du</h3>
+      <ol class="hilfe-liste">
+        <li>Maschine einschalten. Der Selbsttest läuft: Der Farbsensor wird geprüft und das Rad sucht seine Stellung. Die Kammern im Rad müssen dafür leer sein, also das Magazin erst danach füllen.</li>
+        <li>Ein kurzer Piep, auf dem Display steht <b>„Knopf = Start“</b>. Jetzt Kugeln ins Magazin geben.</li>
+        <li>Knopf am Gerät kurz drücken oder hier auf <b>„Start“</b> tippen – die Maschine sortiert.</li>
+        <li>Ist das Magazin leer, meldet sie „Magazin leer“. Nachfüllen und quittieren, dann geht es weiter.</li>
+      </ol>
+      <h3>Knopf am Gerät</h3>
+      <dl>
+        <dt><kbd>kurz</kbd></dt><dd>Start · Pause · Weiter, bei einem Fehler: quittieren</dd>
+        <dt><kbd>5 s</kbd></dt><dd>Zähler und Statistik auf 0 (im Einrichtbetrieb: beenden)</dd>
+        <dt><kbd>10 s</kbd></dt><dd>Einrichtbetrieb starten</dd>
+        <dt><kbd>15 s</kbd></dt><dd>Arduino neu starten</dd>
+      </dl>
+      <p class="hinweistext">Beim Halten zeigt das Display, was beim Loslassen passiert. Erst loslassen, wenn das Richtige dasteht.</p>
+      <h3>Wenn ein Fehler kommt</h3>
+      <dl id="hilfeFehler"></dl>
+      <h3>Signale vom Summer</h3>
+      <dl>
+        <dt>1 kurzer Ton</dt><dd>Selbsttest OK, bereit zum Start</dd>
+        <dt>2 kurze Töne</dt><dd>Abzählziel erreicht</dd>
+        <dt>3 Töne</dt><dd>Fehler – danach alle 30 s zwei Töne, bis quittiert ist</dd>
+        <dt>5 Töne</dt><dd>Arduino hing und wurde automatisch neu gestartet</dd>
+      </dl>
+      <h3>Einrichtbetrieb</h3>
+      <ol class="hilfe-liste">
+        <li>Starten über „Einrichtbetrieb“ (oder Knopf 10 s halten). Die laufende Kugel wird noch fertig sortiert.</li>
+        <li>Behälter oder Schranke antippen, dann mit −/+ oder dem Schieber den Winkel einstellen.</li>
+        <li>Farben einlernen, umbenennen oder Behälter tauschen: „Farben einlernen &amp; verwalten“.</li>
+        <li><b>Speichern</b> nicht vergessen – ohne Speichern wird beim Beenden alles auf den vorherigen Stand zurückgesetzt.</li>
+      </ol>
+      <h3>Verbindung</h3>
+      <ol class="hilfe-liste">
+        <li>Oben rechts „Verbinden“, im Fenster „Sortiermaschine“ wählen.</li>
+        <li>Es kann immer nur <b>ein</b> Gerät verbunden sein (PC oder Handy).</li>
+        <li>Funktioniert in Chrome und Edge (PC) bzw. Chrome (Android), nicht auf dem iPhone.</li>
+      </ol>
     </div>
   </div>
 </dialog>
@@ -1874,7 +1941,7 @@ function verarbeiten(t){
       case "Erinnerung":  melden(leer ? "Magazin ist noch leer" : "Fehler steht noch an: "+f.kurz, leer ? "Kugeln nachfüllen, dann quittieren." : f.tipp); break;
       case "Abzaehlziel": melden("Abzählziel erreicht", `${a.ziel} Kugeln${a.farbe ? " "+farbText(a.farbe) : ""} sortiert – Behälter leeren, dann „Weiter“.`); break;
       case "Bereit":      letzteZeile.startsWith("Summer an") ? melden("Summer ist an", "Ab jetzt piept die Maschine wieder.")
-                                                              : melden("Sortiermaschine bereit", "Selbsttest OK – es kann losgehen."); break;
+                                                              : melden("Sortiermaschine bereit", "Selbsttest OK – Knopf drücken oder „Start“ tippen, dann wird sortiert."); break;
       case "Test":        melden("Summer-Test", "Der Summer hat 3× gepiept."); break;
       case "Watchdog":    melden("Arduino neu gestartet", "Der Watchdog hat einen Hänger erkannt."); break;
       default:            melden("Sortiermaschine", t.slice(8));
@@ -1896,7 +1963,8 @@ function verarbeiten(t){
   if(imStatus && (t==="" || /^(Neuer Zustand|===|Kugel \d)/.test(t))) imStatus=false;   // Block unerwartet zu Ende
   if(imStatus){
     if((m=t.match(/^Zustand:\s+(\w+)(.*)$/))){
-      z.zustand=m[1]; z.pause=m[2].includes("(PAUSE)"); z.pauseFolgt=m[2].includes("Pause angefordert");
+      z.zustand=m[1]; z.pause=m[2].includes("(PAUSE"); z.pauseFolgt=m[2].includes("Pause angefordert");
+      z.startBereit=m[2].includes("bereit zum Start");
       z.einrichtFolgt=m[2].includes("Einrichtbetrieb angefordert");
       if(z.zustand!=="FEHLER"){ z.fehlerKurz=""; z.fehlerGrund=""; }
     }
@@ -1951,12 +2019,14 @@ function verarbeiten(t){
 
   if(t.startsWith("Pause angefordert")){ z.pauseFolgt=true; return; }
   if(t==="Pause"){ z.pause=true; z.pauseFolgt=false; z.ereignisse.push({zeit:Date.now(), art:"pause"}); diagrammNeu=true; return; }
-  if(t.startsWith("Pause beendet")){ z.pause=false; z.abz.erreicht=false; z.ereignisse.push({zeit:Date.now(), art:"weiter"}); diagrammNeu=true; return; }
+  if(t.startsWith("Bereit: Knopf")){ z.pause=true; z.startBereit=true; return; }        // nach dem Selbsttest: wartet auf Start
+  if(t.startsWith("Sortieren gestartet")){ z.startBereit=false; return; }
+  if(t.startsWith("Pause beendet")){ z.pause=false; z.startBereit=false; z.abz.erreicht=false; z.ereignisse.push({zeit:Date.now(), art:"weiter"}); diagrammNeu=true; return; }
   if(t.startsWith("Pause abgebrochen")){ z.pauseFolgt=false; return; }
   if(t.startsWith("Zaehler und Statistik zurueckgesetzt") || t.startsWith("Neustart...") || t.startsWith("Programm:")){
     z.kugeln=0; z.tempo=null; z.anzahl=FARBEN.map(()=>0); z.abz.stand=0; z.abz.erreicht=false; z.stat=null; z.letzte=null;
     z.verlauf=[]; z.ereignisse=[]; z.messungen=[]; z.hellVerlauf=[]; diagrammNeu=true;   // neuer Lauf
-    if((m=t.match(/^Programm:\s+(\S+)/))){ z.programm=m[1]; z.abz.ziel=0; z.pause=false; z.pauseFolgt=false; z.einricht=false; }
+    if((m=t.match(/^Programm:\s+(\S+)/))){ z.programm=m[1]; z.abz.ziel=0; z.pause=false; z.pauseFolgt=false; z.einricht=false; z.startBereit=false; }
     if(t.startsWith("Neustart")) meldung("Arduino startet neu …");
     if(t.startsWith("Zaehler")) meldung("Zähler und Statistik zurückgesetzt");
     return;
@@ -2130,11 +2200,11 @@ function anzeigen(){
   $("formWinkel").querySelector("button").disabled=!aktiv;
 
   // Pause-Knöpfe
-  const pauseText = z.pause ? "Weiter" : z.pauseFolgt ? "Pause abbrechen" : "Pause";
+  const pauseText = z.pause ? (z.startBereit ? "Start" : "Weiter") : z.pauseFolgt ? "Pause abbrechen" : "Pause";
   $$(".knopf-pause").forEach(b=>{
     b.querySelector(".pause-text").textContent=pauseText;
-    b.querySelector(".ic-pause").hidden=z.pause;
-    b.querySelector(".ic-weiter").hidden=!z.pause;
+    b.querySelector(".ic-pause").toggleAttribute("hidden", z.pause);    // SVG kennt .hidden nicht, nur das Attribut
+    b.querySelector(".ic-weiter").toggleAttribute("hidden", !z.pause);
   });
 
   // Hauptkarte
@@ -2144,7 +2214,7 @@ function anzeigen(){
   else if(!z.verbunden && verbindeHinweis){ art="verbinde"; text="Verbindung weg"; }
   else if(z.verbunden){
     if(z.einricht){ art="einricht"; text="Einrichtbetrieb"; }
-    else if(z.pause){ art="pause"; text=z.abz.erreicht ? "Ziel erreicht" : "Pause"; }
+    else if(z.pause){ art="pause"; text=z.startBereit ? "Bereit zum Start" : z.abz.erreicht ? "Ziel erreicht" : "Pause"; }
     else if(z.zustand){
       art="laeuft";
       text = z.pauseFolgt ? "Pause folgt …" : z.einrichtFolgt ? "Einrichten folgt …" : "Läuft · "+(SCHRITTE[z.zustand]||z.zustand);
@@ -2167,6 +2237,7 @@ function anzeigen(){
   }
   setzen("heldHinweis",
     z.pause && z.abz.erreicht ? "Ziel erreicht: Behälter leeren, dann „Weiter“" :
+    z.pause && z.startBereit ? "Selbsttest OK – „Start“ (oder Knopf am Gerät) beginnt das Sortieren" :
     z.pause ? "„Weiter“ setzt das Sortieren fort" :
     z.pauseFolgt ? "Die laufende Kugel wird noch sortiert" :
     z.einrichtFolgt ? "Einrichtbetrieb startet, sobald die laufende Kugel sortiert ist" :
@@ -2764,6 +2835,12 @@ function zusatzEinrichten(){
     if(!bestaetigen(e.currentTarget, e.currentTarget.dataset.frage)) return;
     laeufeSichern([]); laeufeZeigen(); meldung("Alle Läufe gelöscht");
   });
+
+  // Hilfe (Fehlerliste aus FEHLER_INFO)
+  $("hilfeFehler").innerHTML = FEHLER_INFO.map(f=>`<dt>${esc(f.kurz)}</dt><dd>${esc(f.tipp)}</dd>`).join("");
+  $("btnHilfe").addEventListener("click", ()=>$("dlgHilfe").showModal());
+  $("btnHilfeZu").addEventListener("click", ()=>$("dlgHilfe").close());
+  $("dlgHilfe").addEventListener("click", e=>{ if(e.target===$("dlgHilfe")) $("dlgHilfe").close(); });
 
   // Benachrichtigungen
   $("btnBenachr").addEventListener("click", benachrUmschalten);
