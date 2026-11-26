@@ -21,12 +21,17 @@
     Bedienung.html?demo&thema=nacht          (auch: salbei, fjord, sand, lavendel)
 -->
 <script>
-// Farbschema vor dem ersten Zeichnen setzen (kein Aufblitzen)
-(function(){var ids=["auto","salbei","fjord","sand","lavendel","nacht"],t="auto";
-try{t=localStorage.getItem("sm-thema")||"auto"}catch(e){}
+// Farbschema und Stil vor dem ersten Zeichnen setzen (kein Aufblitzen)
+(function(){var h=document.documentElement,ids=["auto","salbei","fjord","sand","lavendel","koralle","kobalt","graphit","retro","beere","nacht","neon","violett","mitternacht","terminal","espresso"],t="auto",s={};
+try{t=localStorage.getItem("sm-thema")||"auto";s=JSON.parse(localStorage.getItem("sm-stil")||"{}")||{}}catch(e){}
 if(ids.indexOf(t)<0)t="auto";
-var d=t==="auto"?(matchMedia("(prefers-color-scheme: dark)").matches?"nacht":"salbei"):t;
-document.documentElement.setAttribute("data-thema",d);})();
+h.setAttribute("data-thema",t==="auto"?(matchMedia("(prefers-color-scheme: dark)").matches?"nacht":"salbei"):t);
+["ecken","look","dichte","groesse"].forEach(function(k){if(s[k])h.setAttribute("data-"+k,s[k])});
+var f={space:["Space Grotesk","Space+Grotesk:wght@400;500;600;700"],plex:["IBM Plex Sans","IBM+Plex+Sans:wght@400;500;600;700"],
+nunito:["Nunito","Nunito:wght@400;600;700;800"],atkinson:["Atkinson Hyperlegible","Atkinson+Hyperlegible:wght@400;700"],
+fraunces:["Fraunces","Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,800"],mono:["JetBrains Mono","JetBrains+Mono:wght@400;500;700;800"],
+system:["Segoe UI",""]}[s.schrift];
+if(f){h.style.setProperty("--schrift",'"'+f[0]+'"');if(f[1])document.write('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family='+f[1]+'&display=swap">')}})();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -93,6 +98,138 @@ document.documentElement.setAttribute("data-thema",d);})();
   --log-bg:#0B100F; --log-text:#CFE3DA; --log-leise:#7C9389;
   --schatten:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.22);
   --schatten-gross:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.28);
+  --abdunkeln:rgba(0,0,0,.6);
+  color-scheme:dark;
+}
+
+/* ---------- weitere helle Farbschemas ---------- */
+[data-thema="koralle"]{   /* Kreativ: Koralle, Petrol, Sonnengelb */
+  --bg:#F8F9FA; --flaeche:#FFFFFF; --kachel:#F1F4F6; --linie:#ECEFF2; --rand:#D9DFE5;
+  --text:#1E293B; --leise:#5B677A;
+  --knopf:#EEF2F5; --knopf-hover:#E2E8ED; --aus:#EEF1F4; --aus-text:#6B7686; --aus-flaeche:#E4E9EE;
+  --akzent:#FF5A5F; --akzent-hover:#F0474D; --akzent-auf:#FFFFFF; --akzent-weich:#DDF1F0; --akzent-dunkel:#006B6B;
+  --warn-weich:#FFF3D6; --warn-text:#7A5900; --warn-stark:#7A5900; --warn-punkt:#FFC857;
+  --fehler:#B42318; --fehler-weich:#FDECEA; --fehler-text:#8E1C13; --fehler-rand:#F2C6C1;
+  --blau-weich:#DDF1F0; --blau-text:#006B6B; --braun-weich:#FFF3D6; --braun-text:#8A6400;
+  --dunkel:#1E293B;
+  --log-bg:#1E293B; --log-text:#E2E8F0; --log-leise:#94A3B8; --log-befehl:#FFC857; --log-info:#7FD1CF;
+  --schatten:0 1px 2px rgba(30,41,59,.05),0 8px 24px rgba(30,41,59,.06);
+  --schatten-gross:0 1px 2px rgba(30,41,59,.05),0 10px 30px rgba(30,41,59,.08);
+  --abdunkeln:rgba(15,23,42,.5);
+}
+[data-thema="kobalt"]{    /* Clean & dynamisch: Kobaltblau, Limette */
+  --bg:#F1F5F9; --flaeche:#FFFFFF; --kachel:#F6F8FB; --linie:#EDF1F6; --rand:#D8E0EA;
+  --text:#0F172A; --leise:#5A6B82;
+  --knopf:#EEF3F9; --knopf-hover:#E1E9F3; --aus:#EEF2F6; --aus-text:#6A7A90; --aus-flaeche:#E3E9F0;
+  --akzent:#2563EB; --akzent-hover:#1D4ED8; --akzent-auf:#FFFFFF; --akzent-weich:#DBE7FE; --akzent-dunkel:#1E40AF;
+  --blau-weich:#DBE7FE; --blau-text:#1E40AF; --braun-weich:#ECFCCB; --braun-text:#3F6212;
+  --dunkel:#0F172A;
+  --log-bg:#0F172A; --log-text:#E2E8F0; --log-leise:#8392A7; --log-befehl:#A3E635; --log-info:#FDBA74;
+  --schatten:0 1px 2px rgba(15,23,42,.05),0 8px 24px rgba(15,23,42,.06);
+  --schatten-gross:0 1px 2px rgba(15,23,42,.05),0 10px 30px rgba(15,23,42,.08);
+  --abdunkeln:rgba(15,23,42,.5);
+}
+[data-thema="graphit"]{   /* Minimal schwarz-weiß */
+  --bg:#F3F3F1; --flaeche:#FFFFFF; --kachel:#F5F5F3; --linie:#ECECE9; --rand:#D8D8D4;
+  --text:#141414; --leise:#62625E;
+  --knopf:#EFEFEC; --knopf-hover:#E4E4E0; --aus:#EFEFEC; --aus-text:#7A7A75; --aus-flaeche:#E6E6E2;
+  --akzent:#141414; --akzent-hover:#333333; --akzent-auf:#FFFFFF; --akzent-weich:#E8E8E5; --akzent-dunkel:#141414;
+  --blau-weich:#EAEAE7; --blau-text:#141414; --braun-weich:#EAEAE7; --braun-text:#141414;
+  --dunkel:#141414;
+  --log-bg:#141414; --log-text:#E8E8E5; --log-leise:#8E8E89; --log-befehl:#FFFFFF; --log-info:#D6D6D2;
+  --schatten:0 1px 2px rgba(0,0,0,.05),0 8px 24px rgba(0,0,0,.05);
+  --schatten-gross:0 1px 2px rgba(0,0,0,.05),0 10px 30px rgba(0,0,0,.07);
+  --abdunkeln:rgba(0,0,0,.5);
+}
+[data-thema="retro"]{     /* 70er: Creme, Terrakotta, Petrolgrün, Senf */
+  --bg:#F4EAD7; --flaeche:#FFF8EC; --kachel:#F7EEDD; --linie:#EFE3CC; --rand:#E0CFAE;
+  --text:#3B2A1A; --leise:#7A6449;
+  --knopf:#F2E5CC; --knopf-hover:#EAD9B9; --aus:#F1E6D2; --aus-text:#8A7458; --aus-flaeche:#E9DCC3;
+  --akzent:#C8531A; --akzent-hover:#B04612; --akzent-auf:#FFFFFF; --akzent-weich:#DCEBE4; --akzent-dunkel:#2E5E4E;
+  --warn-weich:#F6E2A8; --warn-text:#6B4E00; --warn-stark:#6B4E00; --warn-punkt:#E1A915;
+  --blau-weich:#DCEBE4; --blau-text:#2E5E4E; --braun-weich:#F6E2A8; --braun-text:#7A5300;
+  --dunkel:#3B2A1A;
+  --log-bg:#3B2A1A; --log-text:#F4EAD7; --log-leise:#B39C7D; --log-befehl:#F2B33D; --log-info:#9CC9B5;
+  --schatten:0 1px 2px rgba(59,42,26,.06),0 8px 24px rgba(59,42,26,.07);
+  --schatten-gross:0 1px 2px rgba(59,42,26,.06),0 10px 30px rgba(59,42,26,.09);
+  --abdunkeln:rgba(40,28,16,.5);
+}
+[data-thema="beere"]{     /* Beere: Magenta, Pflaume */
+  --bg:#F8F1F5; --flaeche:#FFFFFF; --kachel:#FBF5F8; --linie:#F3E9EF; --rand:#E7D4DF;
+  --text:#2D1B26; --leise:#735A69;
+  --knopf:#F6ECF2; --knopf-hover:#EEDDE7; --aus:#F4ECF1; --aus-text:#86707D; --aus-flaeche:#ECDFE7;
+  --akzent:#A3246F; --akzent-hover:#8C1C5F; --akzent-auf:#FFFFFF; --akzent-weich:#F6DDEB; --akzent-dunkel:#7E1A55;
+  --blau-weich:#EDE3F7; --blau-text:#5B3A93; --braun-weich:#FBEBD9; --braun-text:#8A5216;
+  --dunkel:#2D1B26;
+  --log-bg:#2D1B26; --log-text:#F3E4EC; --log-leise:#A68C9B; --log-befehl:#F59AC8; --log-info:#F5C98B;
+  --schatten:0 1px 2px rgba(45,27,38,.05),0 8px 24px rgba(45,27,38,.06);
+  --schatten-gross:0 1px 2px rgba(45,27,38,.05),0 10px 30px rgba(45,27,38,.08);
+  --abdunkeln:rgba(35,20,30,.5);
+}
+/* ---------- weitere dunkle Farbschemas ---------- */
+[data-thema="neon"],[data-thema="violett"]{   /* Tech: Nachtblau mit Neon */
+  --bg:#0B0F19; --flaeche:#161E31; --kachel:#1B2540; --linie:#1E2945; --rand:#2A3A5E;
+  --text:#F1F5F9; --leise:#94A3B8;
+  --knopf:#1D2742; --knopf-hover:#25314F; --aus:#141C2E; --aus-text:#5D6B85; --aus-flaeche:#121A2B;
+  --akzent:#00F5D4; --akzent-hover:#5CFFE6; --akzent-auf:#032A24; --akzent-weich:#0F3A3D; --akzent-dunkel:#4FF8E0;
+  --warn-weich:#3A3016; --warn-text:#FFD166; --warn-stark:#FFD166; --warn-auf:#2A2006; --warn-punkt:#FFD166;
+  --fehler:#FF5C8A; --fehler-auf:#2B0712; --fehler-weich:#3B1626; --fehler-text:#FF9DBA; --fehler-rand:#5C2440;
+  --blau-weich:#26184A; --blau-text:#C29BFF; --braun-weich:#3A3016; --braun-text:#FFD166;
+  --dunkel:#F1F5F9; --dunkel-auf:#0B0F19;
+  --log-bg:#060912; --log-text:#CBD5E1; --log-leise:#64748B; --log-befehl:#00F5D4; --log-info:#FFD166; --log-hervor:#FFFFFF; --log-fehler:#FF9DBA;
+  --schatten:0 0 0 1px rgba(0,245,212,.05),0 8px 28px rgba(0,0,0,.45);
+  --schatten-gross:0 0 0 1px rgba(0,245,212,.07),0 12px 36px rgba(0,0,0,.5);
+  --abdunkeln:rgba(0,0,0,.65);
+  color-scheme:dark;
+}
+[data-thema="violett"]{
+  --akzent:#9D4EDD; --akzent-hover:#B06BE8; --akzent-auf:#FFFFFF; --akzent-weich:#2A1846; --akzent-dunkel:#D2A8FF;
+  --blau-weich:#0F3A3D; --blau-text:#4FF8E0; --log-befehl:#C77DFF;
+  --schatten:0 0 0 1px rgba(157,78,221,.08),0 8px 28px rgba(0,0,0,.45);
+  --schatten-gross:0 0 0 1px rgba(157,78,221,.1),0 12px 36px rgba(0,0,0,.5);
+}
+[data-thema="mitternacht"]{   /* Navy und Gold */
+  --bg:#0E1525; --flaeche:#152036; --kachel:#1B2943; --linie:#1D2B47; --rand:#2B3C60;
+  --text:#EEF2F8; --leise:#9AA8BF;
+  --knopf:#1C2A45; --knopf-hover:#243556; --aus:#131D31; --aus-text:#5F6E88; --aus-flaeche:#111A2C;
+  --akzent:#E9B949; --akzent-hover:#F3C964; --akzent-auf:#231A04; --akzent-weich:#3A3218; --akzent-dunkel:#F2CD72;
+  --warn-weich:#3B2617; --warn-text:#FDBA74; --warn-stark:#FDBA74; --warn-auf:#2A1505; --warn-punkt:#FB923C;
+  --fehler:#F87171; --fehler-auf:#2A0808; --fehler-weich:#3A1A1E; --fehler-text:#FCA5A5; --fehler-rand:#5A2A2E;
+  --blau-weich:#1E3157; --blau-text:#93B4F0; --braun-weich:#3A3218; --braun-text:#F2CD72;
+  --dunkel:#EEF2F8; --dunkel-auf:#0E1525;
+  --log-bg:#090E1A; --log-text:#D5DDEA; --log-leise:#6E7D96; --log-befehl:#F2CD72; --log-info:#93B4F0; --log-hervor:#FFFFFF; --log-fehler:#FCA5A5;
+  --schatten:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.3);
+  --schatten-gross:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
+  --abdunkeln:rgba(0,0,0,.6);
+  color-scheme:dark;
+}
+[data-thema="terminal"]{      /* Grün auf Schwarz */
+  --bg:#050A06; --flaeche:#0B140D; --kachel:#0F1C12; --linie:#142617; --rand:#1F3A24;
+  --text:#C9F7CF; --leise:#6FA77A;
+  --knopf:#102014; --knopf-hover:#16301B; --aus:#0A130C; --aus-text:#3F6B48; --aus-flaeche:#09110A;
+  --akzent:#39FF6A; --akzent-hover:#7DFF9C; --akzent-auf:#031A08; --akzent-weich:#0F3318; --akzent-dunkel:#6BFF8E;
+  --warn-weich:#2B2A0B; --warn-text:#F4E04D; --warn-stark:#F4E04D; --warn-auf:#1F1A02; --warn-punkt:#F4E04D;
+  --fehler:#FF4D4D; --fehler-auf:#200404; --fehler-weich:#2E0E0E; --fehler-text:#FF8A8A; --fehler-rand:#4D1A1A;
+  --blau-weich:#0E2A2E; --blau-text:#5CE1E6; --braun-weich:#2B2A0B; --braun-text:#F4E04D;
+  --dunkel:#C9F7CF; --dunkel-auf:#050A06;
+  --log-bg:#020503; --log-text:#9EF0AC; --log-leise:#3F7A4B; --log-befehl:#39FF6A; --log-info:#F4E04D; --log-hervor:#E8FFEC; --log-fehler:#FF8A8A;
+  --schatten:0 0 0 1px rgba(57,255,106,.08),0 8px 24px rgba(0,0,0,.5);
+  --schatten-gross:0 0 0 1px rgba(57,255,106,.1),0 10px 30px rgba(0,0,0,.55);
+  --abdunkeln:rgba(0,0,0,.7);
+  color-scheme:dark;
+}
+[data-thema="espresso"]{      /* Warm dunkel: Espresso und Karamell */
+  --bg:#17120F; --flaeche:#211A16; --kachel:#2A211C; --linie:#2D241E; --rand:#3D3129;
+  --text:#F1E7DD; --leise:#B3A293;
+  --knopf:#2C231D; --knopf-hover:#362B24; --aus:#1E1713; --aus-text:#7A6A5D; --aus-flaeche:#1B1511;
+  --akzent:#D9A066; --akzent-hover:#E6B27C; --akzent-auf:#2A1A0B; --akzent-weich:#3A2B1D; --akzent-dunkel:#EBC291;
+  --warn-weich:#3A3017; --warn-text:#EBCB8B; --warn-stark:#EBCB8B; --warn-auf:#2A2010; --warn-punkt:#EBCB8B;
+  --fehler:#E5806F; --fehler-auf:#2A0F0B; --fehler-weich:#3B2320; --fehler-text:#F4B4A8; --fehler-rand:#5A352F;
+  --blau-weich:#1F2A33; --blau-text:#9FC3DD; --braun-weich:#3A2B1D; --braun-text:#EBC291;
+  --dunkel:#F1E7DD; --dunkel-auf:#17120F;
+  --log-bg:#0F0B09; --log-text:#E8DCCF; --log-leise:#8A7A6C; --log-befehl:#EBC291; --log-info:#9FC3DD; --log-hervor:#FFFFFF; --log-fehler:#F4B4A8;
+  --schatten:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.3);
+  --schatten-gross:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
   --abdunkeln:rgba(0,0,0,.6);
   color-scheme:dark;
 }
@@ -502,7 +639,7 @@ dialog.sheet::backdrop{background:var(--abdunkeln)}
 .farbwahl input{position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; border:0; padding:0}
 .farbwahl .kugel{width:30px; height:30px}
 .slot-text{display:flex; flex-direction:column; gap:2px; min-width:0}
-.slot-text input{height:36px; border:0; box-shadow:inset 0 0 0 1.5px var(--rand); border-radius:10px; background:var(--flaeche); padding:0 10px; font:700 15px Manrope,"Segoe UI",system-ui,sans-serif; color:var(--text); width:100%; min-width:0}
+.slot-text input{height:36px; border:0; box-shadow:inset 0 0 0 1.5px var(--rand); border-radius:10px; background:var(--flaeche); padding:0 10px; font-weight:700; font-size:15px; font-family:inherit; color:var(--text); width:100%; min-width:0}
 .slot-text span{font-size:11px; font-weight:700; color:var(--leise); padding-left:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .slot-text span.ok{color:var(--akzent-dunkel)}
 .slot-text span.warn{color:var(--warn-text)}
@@ -519,6 +656,83 @@ dialog.sheet::backdrop{background:var(--abdunkeln)}
 .zusammenfassung{display:flex; flex-direction:column; gap:6px; margin:0; padding:0; list-style:none}
 .zusammenfassung li{display:flex; align-items:center; gap:10px; background:var(--kachel); border-radius:12px; padding:9px 12px; font-size:13px; font-weight:700}
 .zusammenfassung li span:last-child{margin-left:auto; font-size:12px; font-weight:700}
+
+/* ================= Design-Menü (Reiter) ================= */
+.menue{width:min(340px, calc(100vw - 24px)); max-height:min(78vh, 660px); overflow:auto; padding:10px}
+@media (max-width:640px){   /* Handy: Menü über die ganze Breite unter der Kopfzeile */
+  .menue{position:fixed; left:12px; right:12px; top:calc(var(--kopf-h,72px) + 4px); width:auto; max-height:calc(100vh - var(--kopf-h,72px) - 24px)}
+}
+.reiter{display:grid; grid-template-columns:repeat(3,1fr); gap:4px; background:var(--kachel); border-radius:12px; padding:4px; position:sticky; top:-10px; z-index:1}
+.reiter button{min-height:36px; border-radius:9px; background:transparent; font-size:13px; box-shadow:none; border:0}
+.reiter button:hover:not(:disabled){background:var(--knopf-hover)}
+.reiter button[aria-selected="true"],.reiter button[aria-selected="true"]:hover:not(:disabled){background:var(--akzent); color:var(--akzent-auf)}
+.reiter-inhalt{display:flex; flex-direction:column; gap:8px; padding-top:10px}
+.reiter-inhalt h3{margin:6px 4px 0}
+.themen-gitter{display:grid; grid-template-columns:1fr 1fr; gap:8px}
+/* Jede Karte trägt data-thema und zeigt sich damit in den Farben ihres eigenen Schemas */
+.thema-karte{flex-direction:column; align-items:stretch; gap:6px; padding:6px; min-height:0; height:auto; background:var(--bg); color:var(--text); border-radius:12px; box-shadow:inset 0 0 0 1px var(--rand); border:0}
+.thema-karte:hover:not(:disabled){background:var(--bg); filter:brightness(.97)}
+.thema-karte .mini{height:48px; border-radius:8px; padding:7px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:inset 0 0 0 1px rgba(127,127,127,.25)}
+.thema-karte .mini i{display:block; height:13px; width:72%; border-radius:4px}
+.thema-karte .mini b{display:block; height:11px; width:44%; border-radius:999px}
+.thema-karte > span{display:flex; justify-content:space-between; align-items:center; font-size:12px; font-weight:700; text-align:left}
+.thema-karte .haken{opacity:0; color:var(--akzent-dunkel)}
+.thema-karte[aria-checked="true"]{box-shadow:inset 0 0 0 2px var(--akzent)}
+.thema-karte[aria-checked="true"] .haken{opacity:1}
+.schrift-wahl{width:100%; justify-content:space-between; background:transparent; box-shadow:inset 0 0 0 1px var(--linie); min-height:52px; padding:0 14px; font-weight:600; border:0}
+.schrift-wahl:hover:not(:disabled){background:var(--kachel)}
+.schrift-wahl b{font-size:20px; font-weight:700; white-space:nowrap}
+.schrift-wahl span{font-size:12px; color:var(--leise); font-family:Manrope,"Segoe UI",system-ui,sans-serif}
+.schrift-wahl[aria-checked="true"]{box-shadow:inset 0 0 0 2px var(--akzent); background:var(--akzent-weich); color:var(--akzent-dunkel)}
+.segment{display:grid; grid-template-columns:repeat(3,1fr); gap:4px; background:var(--kachel); border-radius:12px; padding:4px}
+.segment button{min-height:36px; border-radius:9px; background:transparent; font-size:12.5px; padding:0 6px; box-shadow:none; border:0}
+.segment button:hover:not(:disabled){background:var(--knopf-hover)}
+.segment button[aria-pressed="true"],.segment button[aria-pressed="true"]:hover:not(:disabled){background:var(--akzent-weich); color:var(--akzent-dunkel); box-shadow:inset 0 0 0 1.5px var(--akzent)}
+
+/* ================= Stil: Schrift ================= */
+body{font-family:var(--schrift, Manrope),"Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+
+/* ================= Stil: Look ================= */
+/* Minimal: flach, keine Schatten, Karten nur mit feiner Linie */
+[data-look="minimal"]{--schatten:none; --schatten-gross:none; --knopf:transparent; --flaeche:var(--bg)}
+[data-look="minimal"] .karte,[data-look="minimal"] .kpi > div,[data-look="minimal"] .k-symbol,[data-look="minimal"] .menue,
+[data-look="minimal"] .verbindung:not([data-art="getrennt"]){box-shadow:inset 0 0 0 1px var(--rand)}
+[data-look="minimal"] button:not(.k-akzent):not(.k-fehler):not(.k-dunkel):not(.k-warn):not(.k-weich):not(.schalter):not(.text-knopf):not(.text-link):not(.thema-karte):not(.schrift-wahl):not(.menue-eintrag):not(.chip-cmd):not([aria-pressed="true"]):not([aria-selected]){box-shadow:inset 0 0 0 1px var(--rand)}
+[data-look="minimal"] .k-fehler{box-shadow:none}
+/* Kontrast: kräftige Rahmen und harte Schatten (Neo-Brutalismus) */
+[data-look="kontrast"]{--schatten:4px 4px 0 var(--text); --schatten-gross:6px 6px 0 var(--text)}
+[data-look="kontrast"] .karte,[data-look="kontrast"] .kpi > div,[data-look="kontrast"] .menue,[data-look="kontrast"] dialog.sheet{border:2px solid var(--text)}
+[data-look="kontrast"] button:not(.schalter):not(.text-knopf):not(.text-link):not(.thema-karte):not(.schrift-wahl):not(.menue-eintrag):not(.chip-cmd):not([aria-selected]):not(.segment button):not(.pfeile button):not(.laeufe button){border:2px solid var(--text)}
+[data-look="kontrast"] button:disabled{border-color:var(--rand)!important}
+[data-look="kontrast"] button:active:not(:disabled){transform:translate(2px,2px)}
+[data-look="kontrast"] .feld,[data-look="kontrast"] .eingabe input,[data-look="kontrast"] .stepper input,[data-look="kontrast"] .slot-text input{box-shadow:inset 0 0 0 2px var(--text)}
+[data-look="kontrast"] .karte h2,[data-look="kontrast"] .riesig{letter-spacing:-.02em}
+
+/* ================= Stil: Ecken ================= */
+[data-ecken="eckig"] *,[data-ecken="eckig"] *::before,[data-ecken="eckig"] *::after{border-radius:0!important}
+[data-ecken="eckig"] .kugel,[data-ecken="eckig"] .punkt,[data-ecken="eckig"] .chip i,[data-ecken="eckig"] .ls b i,
+[data-ecken="eckig"] .live i,[data-ecken="eckig"] .q-name .kugel{border-radius:50%!important}
+[data-ecken="weich"] .karte,[data-ecken="weich"] .kpi > div{border-radius:30px}
+[data-ecken="weich"] .held{border-radius:36px}
+[data-ecken="weich"] button:not(.schalter):not(.pfeile button){border-radius:22px}
+[data-ecken="weich"] .feld,[data-ecken="weich"] .eingabe input,[data-ecken="weich"] .stepper input,[data-ecken="weich"] .slot-text input{border-radius:22px}
+[data-ecken="weich"] .farbzelle,[data-ecken="weich"] .letzte,[data-ecken="weich"] .infozeile,[data-ecken="weich"] .winkelbox,[data-ecken="weich"] .ls,
+[data-ecken="weich"] .banner,[data-ecken="weich"] .fehlerbox,[data-ecken="weich"] .farbslot,[data-ecken="weich"] .assist-farbe,[data-ecken="weich"] .pos-liste,
+[data-ecken="weich"] .ergebnis,[data-ecken="weich"] #log,[data-ecken="weich"] .csv,[data-ecken="weich"] .menue,[data-ecken="weich"] .d-leer{border-radius:26px}
+[data-ecken="weich"] dialog.sheet{border-radius:38px 38px 0 0}
+@media (min-width:760px){ [data-ecken="weich"] dialog.sheet{border-radius:38px} }
+
+/* ================= Stil: Abstände und Größe ================= */
+[data-dichte="kompakt"] .karte{padding:12px; gap:10px}
+[data-dichte="kompakt"] .layout,[data-dichte="kompakt"] .inhalt,[data-dichte="kompakt"] .ansicht,[data-dichte="kompakt"] .spalten,[data-dichte="kompakt"] .spalte{gap:9px}
+[data-dichte="kompakt"] button:not(.schalter):not(.pfeile button):not(.laeufe button){min-height:38px}
+[data-dichte="kompakt"] .k-gross{min-height:48px}
+[data-dichte="luftig"] .karte{padding:24px; gap:18px}
+[data-dichte="luftig"] .layout,[data-dichte="luftig"] .inhalt,[data-dichte="luftig"] .ansicht,[data-dichte="luftig"] .spalten,[data-dichte="luftig"] .spalte{gap:20px}
+[data-dichte="luftig"] button:not(.schalter):not(.pfeile button):not(.laeufe button){min-height:50px}
+[data-dichte="luftig"] .k-gross{min-height:64px}
+[data-groesse="klein"] body{zoom:.9}
+[data-groesse="gross"] body{zoom:1.12}
 
 /* ================= Tastenkürzel ================= */
 @media (hover:none),(pointer:coarse){ .nur-pc{display:none!important} }
@@ -603,9 +817,28 @@ kbd{display:inline-block; min-width:26px; padding:3px 7px; border-radius:7px; ba
     <button id="btnTasten" class="k-symbol nur-pc" aria-label="Tastenkürzel" title="Tastenkürzel (?)"><svg class="ic"><use href="#i-tasten"/></svg></button>
     <div class="design">
       <button id="btnDesign" class="k-symbol" aria-haspopup="true" aria-expanded="false" aria-label="Farbschema wählen" title="Farbschema wählen"><svg class="ic"><use href="#i-design"/></svg></button>
-      <div id="designMenue" class="menue" role="menu" hidden>
-        <h3>Farbschema</h3>
-        <div id="themenListe"></div>
+      <div id="designMenue" class="menue" role="dialog" aria-label="Design" hidden>
+        <div class="reiter" role="tablist">
+          <button role="tab" data-reiter="farben" aria-selected="true">Farben</button>
+          <button role="tab" data-reiter="schrift" aria-selected="false">Schrift</button>
+          <button role="tab" data-reiter="stil" aria-selected="false">Stil</button>
+        </div>
+        <div class="reiter-inhalt" data-feld="farben">
+          <h3>Hell</h3><div class="themen-gitter" id="themenHell"></div>
+          <h3>Dunkel</h3><div class="themen-gitter" id="themenDunkel"></div>
+        </div>
+        <div class="reiter-inhalt" data-feld="schrift" id="schriftListe" hidden></div>
+        <div class="reiter-inhalt" data-feld="stil" hidden>
+          <h3>Ecken</h3>
+          <div class="segment" data-stil="ecken"><button data-wert="eckig">Eckig</button><button data-wert="standard">Normal</button><button data-wert="weich">Weich</button></div>
+          <h3>Look</h3>
+          <div class="segment" data-stil="look"><button data-wert="karten">Karten</button><button data-wert="minimal">Minimal</button><button data-wert="kontrast">Kontrast</button></div>
+          <h3>Abstände</h3>
+          <div class="segment" data-stil="dichte"><button data-wert="kompakt">Kompakt</button><button data-wert="normal">Normal</button><button data-wert="luftig">Luftig</button></div>
+          <h3>Größe</h3>
+          <div class="segment" data-stil="groesse"><button data-wert="klein">Klein</button><button data-wert="normal">Normal</button><button data-wert="gross">Groß</button></div>
+          <button class="text-knopf" id="btnStilZurueck" style="align-self:flex-start; margin-top:4px">Alles auf Standard zurücksetzen</button>
+        </div>
       </div>
     </div>
     <button id="btnVerbinden" class="verbindung" data-art="getrennt"><svg class="ic-klein"><use href="#i-bt"/></svg><span id="verbindungText">Verbinden</span></button>
@@ -745,7 +978,7 @@ kbd{display:inline-block; min-width:26px; padding:3px 7px; border-radius:7px; ba
         <div class="reihe"><label for="btnSummer">Summer</label>
           <button class="schalter" id="btnSummer" data-cmd="ton aus" aria-pressed="true" aria-label="Summer"></button>
         </div>
-        <div class="reihe"><label for="btnBenachr">Benachrichtigungen<br><small id="benachrInfo">bei Fehler, Magazin leer, Abzählziel</small></label>
+        <div class="reihe"><label for="btnBenachr">Benachrichtigungen<br><small id="benachrInfo">jedes Mal, wenn der Summer piept</small></label>
           <button class="schalter" id="btnBenachr" aria-pressed="false" aria-label="Benachrichtigungen"></button>
         </div>
       </section>
@@ -787,12 +1020,19 @@ kbd{display:inline-block; min-width:26px; padding:3px 7px; border-radius:7px; ba
             <h2>Nach Farbe</h2>
             <div class="verteilung" id="stFarben"></div>
           </section>
-          <section class="karte o3">
+          <section class="karte o4">
             <div class="karte-kopf"><h2>Fehler</h2><span class="klein-fett" id="stFehlerSumme"></span></div>
             <div class="stapel" style="gap:10px" id="stFehler"></div>
             <p class="hinweistext" id="stFehlerNie"></p>
           </section>
-          <section class="karte o5">
+        </div>
+        <div class="spalte">
+          <section class="karte liste-karte o2">
+            <div class="liste-kopf"><h2>Messung &amp; Mechanik</h2></div>
+            <div id="stAblauf"></div>
+            <p class="hinweistext" style="padding:0 0 12px">Helligkeit 1,000 = so hell wie beim Kalibrieren. Ab 1,040 kommt die Warnung „Sensor reinigen“.</p>
+          </section>
+          <section class="karte o3">
             <div class="karte-kopf"><h2>Messqualität</h2><span class="klein-fett" id="qSumme">seit dem Verbinden</span></div>
             <div class="qual" id="qTabelle"></div>
             <ul class="knapp-liste" id="qKnapp" hidden></ul>
@@ -803,23 +1043,7 @@ kbd{display:inline-block; min-width:26px; padding:3px 7px; border-radius:7px; ba
             <p class="hinweistext">Abstand: wie weit eine Messung von der eingelernten Farbe weg ist (ab 100 µs gilt sie als unbekannt). Vorsprung: wie viel näher sie an ihrer Farbe liegt als an der zweitnächsten – unter 25 µs droht eine Verwechslung.</p>
           </section>
         </div>
-        <div class="spalte">
-          <section class="karte liste-karte o2">
-            <div class="liste-kopf"><h2>Messung &amp; Mechanik</h2></div>
-            <div id="stAblauf"></div>
-            <p class="hinweistext" style="padding:0 0 12px">Helligkeit 1,000 = so hell wie beim Kalibrieren. Ab 1,040 kommt die Warnung „Sensor reinigen“.</p>
-          </section>
-          <section class="karte o4">
-            <h2>CSV-Export</h2>
-            <div class="csv mono" id="stCsv"></div>
-            <div class="gitter2">
-              <button class="k-akzent" id="btnCsvKopieren" style="min-height:50px"><svg class="ic-klein"><use href="#i-kopieren"/></svg>Kopieren</button>
-              <button class="k-rand" id="btnCsvTeilen" style="min-height:50px"><svg class="ic-klein"><use href="#i-teilen"/></svg><span id="csvTeilenText">Teilen</span></button>
-            </div>
-          </section>
-        </div>
       </div>
-      <button class="k-mittel k-gefahr" data-cmd="reset" data-sicher><svg class="ic-klein"><use href="#i-reset"/></svg>Zähler und Statistik zurücksetzen</button>
     </div>
 
     <section class="karte" id="karteLaeufe">
@@ -840,6 +1064,18 @@ kbd{display:inline-block; min-width:26px; padding:3px 7px; border-radius:7px; ba
       </div>
       <p class="hinweistext">Die Läufe werden nur in diesem Browser gespeichert (PC und Handy getrennt). Grün = bester Wert, rot = schlechtester.</p>
     </section>
+
+    <div id="statUnten" class="stapel" hidden>
+      <section class="karte">
+        <h2>CSV-Export</h2>
+        <div class="csv mono" id="stCsv"></div>
+        <div class="gitter2">
+          <button class="k-akzent" id="btnCsvKopieren" style="min-height:50px"><svg class="ic-klein"><use href="#i-kopieren"/></svg>Kopieren</button>
+          <button class="k-rand" id="btnCsvTeilen" style="min-height:50px"><svg class="ic-klein"><use href="#i-teilen"/></svg><span id="csvTeilenText">Teilen</span></button>
+        </div>
+      </section>
+      <button class="k-mittel k-gefahr" data-cmd="reset" data-sicher><svg class="ic-klein"><use href="#i-reset"/></svg>Zähler und Statistik zurücksetzen</button>
+    </div>
   </div>
 
   <!-- ================= Einrichtbetrieb ================= -->
@@ -1187,14 +1423,37 @@ function farbeAus(name, ref){
 }
 let FARBEN = STANDARD_NAMEN.map(n=>farbeAus(n));
 let farbenGeaendert=false;
+// Farbschemas: vorschau = [Hintergrund, Fläche, Akzent, Text/Zweitfarbe] für die Vorschaukarte im Menü
 const THEMEN = [
-  {id:"auto",     name:"Automatisch", vorschau:["#EDF1EC","#3F7D6E","#111816"]},
-  {id:"salbei",   name:"Salbei",      vorschau:["#EDF1EC","#3F7D6E","#DDEBE5"]},
-  {id:"fjord",    name:"Fjord",       vorschau:["#EAF0F4","#3B6E8F","#DCE8F0"]},
-  {id:"sand",     name:"Sand",        vorschau:["#F3EEE6","#9A6B3F","#F0E3D2"]},
-  {id:"lavendel", name:"Lavendel",    vorschau:["#EFEDF5","#6B5BA8","#E4E0F2"]},
-  {id:"nacht",    name:"Nacht",       vorschau:["#111816","#6FBFA5","#1E3832"]},
+  {id:"auto",        name:"Automatisch",       gruppe:"hell",   vorschau:["linear-gradient(135deg,#EDF1EC 50%,#111816 50%)","#FFFFFF","#3F7D6E","#1F2E2B"]},
+  {id:"salbei",      name:"Salbei",            gruppe:"hell",   vorschau:["#EDF1EC","#FFFFFF","#3F7D6E","#1F2E2B"]},
+  {id:"fjord",       name:"Fjord",             gruppe:"hell",   vorschau:["#EAF0F4","#FFFFFF","#3B6E8F","#1C2A35"]},
+  {id:"sand",        name:"Sand",              gruppe:"hell",   vorschau:["#F3EEE6","#FFFDF9","#9A6B3F","#2E261E"]},
+  {id:"lavendel",    name:"Lavendel",          gruppe:"hell",   vorschau:["#EFEDF5","#FFFFFF","#6B5BA8","#262338"]},
+  {id:"koralle",     name:"Koralle & Petrol",  gruppe:"hell",   vorschau:["#F8F9FA","#FFFFFF","#FF5A5F","#008080"]},
+  {id:"kobalt",      name:"Kobalt & Limette",  gruppe:"hell",   vorschau:["#F1F5F9","#FFFFFF","#2563EB","#84CC16"]},
+  {id:"graphit",     name:"Graphit",           gruppe:"hell",   vorschau:["#F3F3F1","#FFFFFF","#141414","#9A9A95"]},
+  {id:"retro",       name:"Retro",             gruppe:"hell",   vorschau:["#F4EAD7","#FFF8EC","#C8531A","#2E5E4E"]},
+  {id:"beere",       name:"Beere",             gruppe:"hell",   vorschau:["#F8F1F5","#FFFFFF","#A3246F","#2D1B26"]},
+  {id:"nacht",       name:"Nacht",             gruppe:"dunkel", vorschau:["#111816","#1A2320","#6FBFA5","#E6EFEB"]},
+  {id:"neon",        name:"Neon Mint",         gruppe:"dunkel", vorschau:["#0B0F19","#161E31","#00F5D4","#F1F5F9"]},
+  {id:"violett",     name:"Neon Violett",      gruppe:"dunkel", vorschau:["#0B0F19","#161E31","#9D4EDD","#F1F5F9"]},
+  {id:"mitternacht", name:"Mitternacht & Gold",gruppe:"dunkel", vorschau:["#0E1525","#152036","#E9B949","#EEF2F8"]},
+  {id:"terminal",    name:"Terminal",          gruppe:"dunkel", vorschau:["#050A06","#0B140D","#39FF6A","#C9F7CF"]},
+  {id:"espresso",    name:"Espresso",          gruppe:"dunkel", vorschau:["#17120F","#211A16","#D9A066","#F1E7DD"]},
 ];
+// Schriftarten (Google Fonts werden erst bei Bedarf geladen)
+const SCHRIFTEN = [
+  {id:"manrope",  name:"Manrope",               css:"Manrope",               gf:"",                                    info:"Standard, modern"},
+  {id:"space",    name:"Space Grotesk",         css:"Space Grotesk",         gf:"Space+Grotesk:wght@400;500;600;700",  info:"technisch, eckig"},
+  {id:"plex",     name:"IBM Plex Sans",         css:"IBM Plex Sans",         gf:"IBM+Plex+Sans:wght@400;500;600;700",  info:"sachlich, Industrie"},
+  {id:"nunito",   name:"Nunito",                css:"Nunito",                gf:"Nunito:wght@400;600;700;800",         info:"rund, freundlich"},
+  {id:"atkinson", name:"Atkinson Hyperlegible", css:"Atkinson Hyperlegible", gf:"Atkinson+Hyperlegible:wght@400;700",  info:"besonders gut lesbar"},
+  {id:"fraunces", name:"Fraunces",              css:"Fraunces",              gf:"Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,800", info:"mit Serifen, edel"},
+  {id:"mono",     name:"JetBrains Mono",        css:"JetBrains Mono",        gf:"JetBrains+Mono:wght@400;500;700;800", info:"Terminal-Look"},
+  {id:"system",   name:"System",                css:"Segoe UI",              gf:"",                                    info:"ohne Download"},
+];
+const STIL_STANDARD = {schrift:"manrope", ecken:"standard", look:"karten", dichte:"normal", groesse:"normal"};
 const SCHRITTE = {
   WARTEN:"wartet auf Kugel", SCHRITT_1:"Kugel fällt", SCHRITT_2:"Farbmessung", SCHRITT_3:"Brücke fährt",
   SCHRITT_4:"Schranke offen", SCHRITT_5:"Schranke schließt", SCHRITT_6:"Schranke schließt", SCHRITT_7:"Schranke schließt",
@@ -1252,18 +1511,64 @@ function themaAnwenden(){
   const echt = id==="auto" ? (matchMedia("(prefers-color-scheme: dark)").matches ? "nacht" : "salbei") : id;
   document.documentElement.dataset.thema=echt;
   document.querySelector('meta[name="theme-color"]').content=getComputedStyle(document.body).getPropertyValue("--bg").trim()||"#EDF1EC";
-  $$(".thema").forEach(b=>b.setAttribute("aria-checked", b.dataset.thema===id ? "true" : "false"));
+  $$(".thema-karte").forEach(b=>b.setAttribute("aria-checked", b.dataset.thema===id ? "true" : "false"));
+  diagrammNeu=true; if(ansicht==="statistik") requestAnimationFrame(diagrammZeichnen);
 }
+
+// Stil (Schrift, Ecken, Look, Abstände, Größe) – gespeichert in "sm-stil"
+function stilLaden(){ let s={}; try{ s=JSON.parse(localStorage.getItem("sm-stil")||"{}")||{}; }catch(e){} return {...STIL_STANDARD, ...s}; }
+const geladeneSchriften=new Set();
+function schriftLaden(sch){
+  if(!sch || !sch.gf || geladeneSchriften.has(sch.id)) return;
+  geladeneSchriften.add(sch.id);
+  const l=document.createElement("link"); l.rel="stylesheet";
+  l.href=`https://fonts.googleapis.com/css2?family=${sch.gf}&display=swap`;
+  document.head.append(l);
+}
+function stilAnwenden(){
+  const s=stilLaden(), h=document.documentElement;
+  ["ecken","look","dichte","groesse"].forEach(k=>{ if(s[k]===STIL_STANDARD[k]) h.removeAttribute("data-"+k); else h.setAttribute("data-"+k, s[k]); });
+  const sch=SCHRIFTEN.find(x=>x.id===s.schrift)||SCHRIFTEN[0];
+  schriftLaden(sch);
+  if(sch.id==="manrope") h.style.removeProperty("--schrift"); else h.style.setProperty("--schrift", `"${sch.css}"`);
+  $$(".schrift-wahl").forEach(b=>b.setAttribute("aria-checked", b.dataset.schrift===sch.id ? "true" : "false"));
+  $$(".segment").forEach(seg=>seg.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed", s[seg.dataset.stil]===b.dataset.wert ? "true" : "false")));
+  diagrammNeu=true; if(ansicht==="statistik") requestAnimationFrame(diagrammZeichnen);
+}
+function stilSetzen(k, v){
+  const s=stilLaden(); s[k]=v;
+  try{ localStorage.setItem("sm-stil", JSON.stringify(s)); }catch(e){}
+  stilAnwenden(); kopfHoehe();
+}
+
 function themenAufbauen(){
-  $("themenListe").innerHTML = THEMEN.map(t=>
-    `<button class="thema" role="menuitemradio" data-thema="${t.id}" aria-checked="false">
-       <span class="vorschau">${t.vorschau.map(f=>`<i style="background:${f}"></i>`).join("")}</span>
-       ${t.name}<svg class="ic-klein haken"><use href="#i-haken"/></svg></button>`).join("");
-  $("themenListe").addEventListener("click", e=>{
-    const b=e.target.closest(".thema"); if(!b) return;
-    try{ localStorage.setItem("sm-thema", b.dataset.thema); }catch(e){}
-    themaAnwenden(); menueZu();
+  const karte = t=>`<button class="thema-karte" role="menuitemradio" data-thema="${t.id}" aria-checked="false">
+      <span class="mini" style="background:${t.vorschau[0]}"><i style="background:${t.vorschau[1]}; box-shadow:inset 3px 0 0 ${t.vorschau[3]}"></i><b style="background:${t.vorschau[2]}"></b></span>
+      <span>${t.name}<svg class="ic-klein haken"><use href="#i-haken"/></svg></span></button>`;
+  $("themenHell").innerHTML = THEMEN.filter(t=>t.gruppe==="hell").map(karte).join("");
+  $("themenDunkel").innerHTML = THEMEN.filter(t=>t.gruppe==="dunkel").map(karte).join("");
+  $("schriftListe").innerHTML = SCHRIFTEN.map(s=>`<button class="schrift-wahl" role="menuitemradio" data-schrift="${s.id}" aria-checked="false">
+      <b style="font-family:'${s.css}','Segoe UI',system-ui,sans-serif">Aa 123</b><span>${s.name} · ${s.info}</span></button>`).join("");
+  $("designMenue").addEventListener("click", e=>{
+    const t=e.target.closest(".thema-karte");
+    if(t){ try{ localStorage.setItem("sm-thema", t.dataset.thema); }catch(err){} themaAnwenden(); return; }
+    const r=e.target.closest("[data-reiter]");
+    if(r){
+      $$("[data-reiter]").forEach(b=>b.setAttribute("aria-selected", b===r ? "true" : "false"));
+      $$("[data-feld]").forEach(f=>f.hidden = f.dataset.feld!==r.dataset.reiter);
+      if(r.dataset.reiter==="schrift") SCHRIFTEN.forEach(schriftLaden);   // für die Vorschau alle laden
+      return;
+    }
+    const sch=e.target.closest(".schrift-wahl");
+    if(sch){ stilSetzen("schrift", sch.dataset.schrift); return; }
+    const seg=e.target.closest(".segment button");
+    if(seg){ stilSetzen(seg.parentElement.dataset.stil, seg.dataset.wert); return; }
+    if(e.target.closest("#btnStilZurueck")){
+      try{ localStorage.removeItem("sm-stil"); localStorage.removeItem("sm-thema"); }catch(err){}
+      themaAnwenden(); stilAnwenden(); kopfHoehe(); meldung("Design auf Standard zurückgesetzt");
+    }
   });
+  stilAnwenden();
   $("btnDesign").addEventListener("click", e=>{ e.stopPropagation(); $("designMenue").hidden ? menueAuf() : menueZu(); });
   document.addEventListener("click", e=>{ if(!e.target.closest(".design")) menueZu(); });
   document.addEventListener("keydown", e=>{ if(e.key==="Escape") menueZu(); });
@@ -1534,11 +1839,18 @@ function datenEmpfangen(e){
     rest=rest.slice(pos+1);
     logZeile(zeile);
     verarbeiten(zeile);
+    letzteZeile=zeile;
   }
   anzeigen();
 }
 
 // ================= Ausgaben des Arduino auswerten =================
+// Meldet der Arduino seine Summer-Signale selbst ("SIGNAL: ...", ab Version 14)?
+let letzteZeile="";
+function signalFirmware(){
+  const nr=parseInt((/(\d+)$/.exec(z.programm||"")||[])[1], 10);
+  return !!z.signaleGesehen || nr>=14;
+}
 function farbIndex(name){ return FARBEN.findIndex(f=>f.name===name); }
 function farbText(name){ const i=farbIndex(name); return i>=0 ? FARBEN[i].text : name; }
 function zahl(t){ return parseFloat(String(t).replace(",", ".")); }
@@ -1549,9 +1861,26 @@ function verarbeiten(t){
     erwarteFehlerGrund=false; z.fehlerGrund=t;
     const f=fehlerInfo();
     if(/Magazin leer/.test(t)){
-      melden("Magazin leer", "Kugeln nachfüllen, dann quittieren.");
+      if(!signalFirmware()) melden("Magazin leer", "Kugeln nachfüllen, dann quittieren.");
       if(z.stat) laufSpeichern("Lauf bis Magazin leer", true);   // die Statistik kam direkt davor
-    } else melden("Fehler: "+f.kurz, f.tipp);
+    } else if(!signalFirmware()) melden("Fehler: "+f.kurz, f.tipp);
+    return;
+  }
+
+  // Ab Version 14: Der Summer meldet jedes Signal als "SIGNAL: <Grund>" -> Benachrichtigung
+  if((m=t.match(/^SIGNAL: (\S+)/))){
+    z.signaleGesehen=true;
+    const f=fehlerInfo(), leer=/Magazin leer/.test(z.fehlerGrund||z.fehlerKurz), a=z.abz;
+    switch(m[1]){
+      case "Fehler":      leer ? melden("Magazin leer", "Kugeln nachfüllen, dann quittieren.") : melden("Fehler: "+f.kurz, f.tipp); break;
+      case "Erinnerung":  melden(leer ? "Magazin ist noch leer" : "Fehler steht noch an: "+f.kurz, leer ? "Kugeln nachfüllen, dann quittieren." : f.tipp); break;
+      case "Abzaehlziel": melden("Abzählziel erreicht", `${a.ziel} Kugeln${a.farbe ? " "+farbText(a.farbe) : ""} sortiert – Behälter leeren, dann „Weiter“.`); break;
+      case "Bereit":      letzteZeile.startsWith("Summer an") ? melden("Summer ist an", "Ab jetzt piept die Maschine wieder.")
+                                                              : melden("Sortiermaschine bereit", "Selbsttest OK – es kann losgehen."); break;
+      case "Test":        melden("Summer-Test", "Der Summer hat 3× gepiept."); break;
+      case "Watchdog":    melden("Arduino neu gestartet", "Der Watchdog hat einen Hänger erkannt."); break;
+      default:            melden("Sortiermaschine", t.slice(8));
+    }
     return;
   }
 
@@ -1609,7 +1938,7 @@ function verarbeiten(t){
     if(/ruettle Trichter/.test(t)){ z.ereignisse.push({zeit:Date.now(), art:"ruetteln"}); diagrammNeu=true; }
     return;
   }
-  if(t.startsWith("WATCHDOG")){ melden("Arduino neu gestartet", "Der Watchdog hat einen Hänger erkannt."); meldung(t); }
+  if(t.startsWith("WATCHDOG")) meldung(t);
   if(t.startsWith("WARTEN: Radstellung korrigiert")){ z.rad="bekannt, Kammer vor LS1"; return; }
   if(/Radstellung (unbekannt|unklar)/.test(t)) z.rad="unbekannt";
   if(t.startsWith("Radsuche: OK")) z.rad="bekannt";
@@ -1638,7 +1967,7 @@ function verarbeiten(t){
     if(/Abzaehlen aus|^Abzaehlen:\s+aus/.test(t)) { z.abz.ziel=0; z.abz.erreicht=false; }
     else if(t.includes("Ziel erreicht")) {
       z.abz.erreicht=true; meldung("Abzählziel erreicht – Behälter leeren, dann „Weiter“");
-      melden("Abzählziel erreicht", `${z.abz.ziel} Kugeln${z.abz.farbe ? " "+farbText(z.abz.farbe) : ""} sortiert – Behälter leeren, dann „Weiter“.`);
+      if(!signalFirmware()) melden("Abzählziel erreicht", `${z.abz.ziel} Kugeln${z.abz.farbe ? " "+farbText(z.abz.farbe) : ""} sortiert – Behälter leeren, dann „Weiter“.`);
     }
     else if((m=t.match(/Pause nach (\d+) Kugeln(?: der Farbe ([A-Za-z][\w-]*))?/))){ z.abz={ziel:+m[1], stand:0, farbe:m[2]||null, erreicht:false}; }
     else if((m=t.match(/(\d+)\/(\d+)(?: ([A-Za-z][\w-]*))?/))){ z.abz.stand=+m[1]; z.abz.ziel=+m[2]; z.abz.farbe=m[3]||null; if(t.startsWith("Abzaehlen neu")) z.abz.erreicht=false; }
@@ -1936,7 +2265,7 @@ function lsKachel(id, wert){
 function statistikZeigen(){
   const s=z.stat;
   laeufeZeigen();
-  $("statLeer").hidden=!!s; $("statInhalt").hidden=!s;
+  $("statLeer").hidden=!!s; $("statInhalt").hidden=!s; $("statUnten").hidden=!s;
   if(s){ qualitaetZeigen(); if(diagrammNeu) requestAnimationFrame(diagrammZeichnen); }
   setzen("statStand", "Seit Start oder Zähler-Reset · " + (s ? "Stand "+z.statZeit.slice(0,5) : "noch keine Daten"));
   if(!s) return;
