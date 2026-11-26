@@ -735,7 +735,7 @@ body{font-family:var(--schrift, Manrope),"Segoe UI",system-ui,-apple-system,Robo
 [data-groesse="gross"] body{zoom:1.12}
 
 /* ================= Hilfe ================= */
-.hilfe dt{white-space:normal; max-width:110px}
+.tasten.hilfe dt{white-space:normal; max-width:130px; overflow-wrap:break-word}   /* lange Fehlernamen umbrechen statt überlappen */
 .hilfe-liste{margin:0; padding-left:20px; display:flex; flex-direction:column; gap:6px; font-size:14px; line-height:1.45}
 .hilfe-liste li::marker{font-weight:800; color:var(--akzent-dunkel)}
 #hilfeFehler dt{font-size:13px; font-weight:800; color:var(--fehler-text)}
