@@ -343,7 +343,15 @@ button.sicher,button.sicher:hover:not(:disabled){background:var(--warn-weich); c
 .marke-warn{background:var(--warn-weich); color:var(--warn-text); border-radius:8px; padding:4px 8px; font-size:12px; font-weight:800; white-space:nowrap}
 .skala{position:relative; height:8px; border-radius:999px; background:var(--rand); margin:4px 11px 0}
 .skala > i{position:absolute; left:0; top:0; bottom:0; border-radius:999px; background:var(--akzent); width:0}
-.skala > b{position:absolute; top:50%; left:0; width:22px; height:22px; margin:-11px 0 0 -11px; border-radius:50%; background:var(--flaeche); box-shadow:inset 0 0 0 3px var(--akzent)}
+.skala > b{position:absolute; top:50%; left:0; width:22px; height:22px; margin:-11px 0 0 -11px; border-radius:50%; background:var(--flaeche); box-shadow:inset 0 0 0 3px var(--akzent); transition:transform .12s}
+/* Schieber zum Ziehen: größere Greiffläche, Knopf wächst beim Ziehen */
+.skala{cursor:grab; touch-action:none; outline-offset:12px}
+.skala::before{content:""; position:absolute; inset:-18px -11px}
+.skala:hover:not([aria-disabled="true"]) > b{transform:scale(1.12)}
+.skala.zieht{cursor:grabbing}
+.skala.zieht > b{transform:scale(1.3); box-shadow:inset 0 0 0 3px var(--akzent), 0 4px 14px color-mix(in srgb,var(--akzent) 40%,transparent)}
+.skala.zieht > i,.skala.zieht > b{transition:none}
+.skala[aria-disabled="true"]{cursor:not-allowed; opacity:.55}
 .skala-text{display:flex; justify-content:space-between; font-size:11px; font-weight:700; color:var(--leise)}
 .stufen button{min-height:56px; border-radius:16px; font-size:17px; font-weight:800}
 .feld{height:48px; min-width:0; border:0; box-shadow:inset 0 0 0 1.5px var(--rand); border-radius:14px; padding:0 14px; font-size:16px; font-weight:700; background:var(--flaeche); color:var(--text)}
@@ -431,6 +439,15 @@ dialog.sheet::backdrop{background:var(--abdunkeln)}
 .ziel .alle{background:conic-gradient(#2B2F2E 0 14%,#4A78C2 0 28%,#E2BE45 0 43%,#5E9E6A 0 57%,#8C6BC2 0 71%,#F7F7F4 0 86%,#CF5A4C 0)}
 .vorschau-befehl{align-self:center; font-size:12px; color:var(--leise); background:var(--kachel); border-radius:8px; padding:4px 10px}
 
+/* ================= Tastenkürzel ================= */
+@media (hover:none),(pointer:coarse){ .nur-pc{display:none!important} }
+.tasten{display:flex; flex-direction:column; gap:6px}
+.tasten h3{margin:8px 0 2px; font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--leise)}
+.tasten dl{display:grid; grid-template-columns:auto minmax(0,1fr); gap:8px 14px; align-items:center; margin:0}
+.tasten dt{white-space:nowrap; font-size:12px; color:var(--leise)}
+.tasten dd{margin:0; font-size:14px; font-weight:600}
+kbd{display:inline-block; min-width:26px; padding:3px 7px; border-radius:7px; background:var(--kachel); box-shadow:inset 0 -2px 0 var(--rand), inset 0 0 0 1px var(--rand); font:700 12px "JetBrains Mono",ui-monospace,Consolas,monospace; color:var(--text); text-align:center}
+
 /* ================= Meldung ================= */
 .toast{
   position:fixed; left:50%; bottom:calc(20px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%); z-index:60;
@@ -490,6 +507,7 @@ dialog.sheet::backdrop{background:var(--abdunkeln)}
   <symbol id="i-schliessen" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
   <symbol id="i-messen" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/></symbol>
   <symbol id="i-zu" viewBox="0 0 24 24"><path d="M4 12h16M4 6v12M20 6v12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+  <symbol id="i-tasten" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6.5 10h.01M10 10h.01M13.5 10h.01M17 10h.01M8 14h8"/></g></symbol>
   <symbol id="i-auf" viewBox="0 0 24 24"><path d="M4 12l6-6M4 6v12M20 6v12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
 </svg>
 
@@ -501,6 +519,7 @@ dialog.sheet::backdrop{background:var(--abdunkeln)}
       <small id="kopfProgramm">Sortiermaschine</small>
       <h1 id="kopfTitel">Übersicht</h1>
     </div>
+    <button id="btnTasten" class="k-symbol nur-pc" aria-label="Tastenkürzel" title="Tastenkürzel (?)"><svg class="ic"><use href="#i-tasten"/></svg></button>
     <div class="design">
       <button id="btnDesign" class="k-symbol" aria-haspopup="true" aria-expanded="false" aria-label="Farbschema wählen" title="Farbschema wählen"><svg class="ic"><use href="#i-design"/></svg></button>
       <div id="designMenue" class="menue" role="menu" hidden>
@@ -728,7 +747,7 @@ dialog.sheet::backdrop{background:var(--abdunkeln)}
               </div>
               <span class="marke-warn" id="auswahlMarke" hidden>nicht gespeichert</span>
             </div>
-            <div class="skala" aria-hidden="true"><i id="skalaFuell"></i><b id="skalaKnopf"></b></div>
+            <div class="skala" id="skala" role="slider" tabindex="0" aria-label="Winkel der gewählten Position" aria-valuemin="0" aria-valuemax="180" aria-valuenow="0" aria-disabled="true"><i id="skalaFuell"></i><b id="skalaKnopf"></b></div>
             <div class="skala-text"><span>0°</span><span>90°</span><span>180°</span></div>
           </div>
           <div class="gitter4 stufen">
@@ -841,6 +860,7 @@ dialog.sheet::backdrop{background:var(--abdunkeln)}
           <button class="chip-cmd" data-cmd="h">h</button>
         </span>
         <span class="rechts">
+          <button class="text-knopf" id="btnLogKopieren" title="Ganzes Protokoll in die Zwischenablage"><svg class="ic-klein"><use href="#i-kopieren"/></svg>Kopieren</button>
           <button class="text-knopf" id="btnLogSpeichern"><svg class="ic-klein"><use href="#i-laden"/></svg>Speichern</button>
           <button class="text-knopf" id="btnLogLeeren">Leeren</button>
         </span>
@@ -850,6 +870,7 @@ dialog.sheet::backdrop{background:var(--abdunkeln)}
         <input id="befehl" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="send" placeholder="Befehl eingeben, z. B. n 10 2">
         <button type="submit" class="k-akzent k-senden" aria-label="Senden" title="Senden"><svg class="ic"><use href="#i-senden"/></svg></button>
       </form>
+      <p class="hinweistext" id="logDatei" hidden></p>
     </div>
   </section>
 </aside>
@@ -895,6 +916,49 @@ dialog.sheet::backdrop{background:var(--abdunkeln)}
       </div>
     </div>
   </form>
+</dialog>
+
+<!-- ================= Tastenkürzel (PC) ================= -->
+<dialog class="sheet" id="dlgTasten" aria-labelledby="dlgTastenTitel">
+  <div class="sheet-inhalt">
+    <div class="sheet-kopf">
+      <div>
+        <h2 id="dlgTastenTitel">Tastenkürzel</h2>
+        <p>Gelten, solange kein Eingabefeld aktiv ist.</p>
+      </div>
+      <button type="button" class="k-symbol" id="btnTastenZu" aria-label="Schließen"><svg class="ic"><use href="#i-schliessen"/></svg></button>
+    </div>
+    <div class="tasten">
+      <h3>Übersicht</h3>
+      <dl>
+        <dt><kbd>Leertaste</kbd></dt><dd>Pause / Weiter</dd>
+        <dt><kbd>Q</kbd></dt><dd>Fehler quittieren</dd>
+        <dt><kbd>E</kbd></dt><dd>Einrichtbetrieb starten</dd>
+        <dt><kbd>S</kbd></dt><dd>Statistik öffnen / schließen</dd>
+        <dt><kbd>N</kbd></dt><dd>Abzählen einstellen</dd>
+        <dt><kbd>R</kbd></dt><dd>Status aktualisieren</dd>
+      </dl>
+      <h3>Einrichtbetrieb</h3>
+      <dl>
+        <dt><kbd>1</kbd> … <kbd>7</kbd></dt><dd>Behälter anfahren</dd>
+        <dt><kbd>Z</kbd> <kbd>A</kbd></dt><dd>Schranke zu / auf</dd>
+        <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>−1° / +1°</dd>
+        <dt><kbd>Umschalt</kbd> + <kbd>←</kbd> <kbd>→</kbd></dt><dd>−5° / +5°</dd>
+        <dt><kbd>M</kbd></dt><dd>Testmessung</dd>
+        <dt><kbd>D</kbd></dt><dd>Rad eine Viertelumdrehung</dd>
+        <dt><kbd>L</kbd></dt><dd>Lichtschranken live an / aus</dd>
+        <dt><kbd>Strg</kbd> + <kbd>S</kbd></dt><dd>Speichern</dd>
+        <dt><kbd>X</kbd> <kbd>X</kbd></dt><dd>Beenden und sortieren (2× drücken)</dd>
+      </dl>
+      <h3>Überall</h3>
+      <dl>
+        <dt><kbd>/</kbd></dt><dd>In die Befehlszeile springen</dd>
+        <dt><kbd>P</kbd></dt><dd>Protokoll ein- / ausklappen</dd>
+        <dt><kbd>?</kbd></dt><dd>Diese Übersicht</dd>
+        <dt><kbd>Esc</kbd></dt><dd>Schließen, Befehlszeile verlassen</dd>
+      </dl>
+    </div>
+  </div>
 </dialog>
 
 <div class="toast" id="meldung" role="status" hidden></div>
@@ -1061,6 +1125,7 @@ function aufbauen(){
     if(!(n>=1 && n<=100)){ meldung("Zyklen 1–100 eingeben"); return; }
     senden(`v ${n}`);
   });
+  schieberEinrichten();
   $("btnPosListe").addEventListener("click", ()=>{
     posListeOffen=!posListeOffen;
     if(posListeOffen) senden("l");
@@ -1086,7 +1151,17 @@ function aufbauen(){
 
   // Protokoll
   $("btnLogSpeichern").addEventListener("click", logSpeichern);
-  $("btnLogLeeren").addEventListener("click", ()=>{ $("log").textContent=""; });
+  $("btnLogKopieren").addEventListener("click", logKopieren);
+  $("btnLogLeeren").addEventListener("click", ()=>{ $("log").textContent=""; logSichtbarAb=logZeilen.length; });
+
+  // Tastenkürzel (PC)
+  $("btnTasten").addEventListener("click", ()=>$("dlgTasten").showModal());
+  $("btnTastenZu").addEventListener("click", ()=>$("dlgTasten").close());
+  $("dlgTasten").addEventListener("click", e=>{ if(e.target===$("dlgTasten")) $("dlgTasten").close(); });
+  document.addEventListener("keydown", tastenkuerzel);
+  document.addEventListener("keyup", e=>{   // Leertaste soll keinen fokussierten Knopf zusätzlich auslösen
+    if(e.key===" " && !istEingabe(e.target) && !e.target.closest("dialog")) e.preventDefault();
+  });
   let logZu=false; try{ logZu=localStorage.getItem("sm-log-zu")==="1"; }catch(e){}
   logKlappen(!logZu);
   $("btnLogZu").addEventListener("click", ()=>{
@@ -1177,8 +1252,10 @@ async function gattVerbinden(){
   setTimeout(()=>{
     if(!z.verbunden) return;
     z.bereit=true; anzeigen();
-    modusPruefen=true; senden("h", true);   // Antwort zeigt, ob Normal- oder Einrichtbetrieb
-    setTimeout(()=>{ if(modusPruefen && z.verbunden) senden("h", true); }, 3000);   // keine Antwort: einmal wiederholen
+    // "csv" als kurze Probe: Normalbetrieb antwortet mit CSV-Zeilen, der Einrichtbetrieb mit
+    // "Unbekannter Befehl". (Früher "h": die lange Hilfe kam über Bluetooth teils lückenhaft an.)
+    modusPruefen=true; senden("csv", true);
+    setTimeout(()=>{ if(modusPruefen && z.verbunden) senden("csv", true); }, 3000);   // keine Antwort: einmal wiederholen
   }, ARDUINO_BEREIT_MS);
 }
 
@@ -1307,7 +1384,15 @@ function verarbeiten(t){
     else if((m=t.match(/(\d+)\/(\d+)(?: (\w+))?/))){ z.abz.stand=+m[1]; z.abz.ziel=+m[2]; z.abz.farbe=m[3]||null; if(t.startsWith("Abzaehlen neu")) z.abz.erreicht=false; }
     return;
   }
-  if(t.startsWith("CSV_Kopf;")){ csvKopf=t.split(";"); z.csvKopfRoh=t; return; }
+  if(t.startsWith("CSV_Kopf;")){
+    csvKopf=t.split(";"); z.csvKopfRoh=t;
+    if(modusPruefen){ modusPruefen=false; z.einricht=false; senden("status", true); }   // Probe: Normalbetrieb
+    return;
+  }
+  if(modusPruefen && t.startsWith("Unbekannter Befehl")){   // Probe: Einrichtbetrieb kennt "csv" nicht
+    modusPruefen=false; z.einricht=true; senden("l", true);
+    return;
+  }
   if(t.startsWith("CSV;") && csvKopf){ z.csvRoh=t; csvAuswerten(t.split(";")); return; }
 
   // Einrichtbetrieb
@@ -1516,11 +1601,11 @@ function anzeigen(){
   if(z.auswahl){
     const i=farbIndex(z.auswahl);
     setzen("auswahlName", i>=0 ? `Behälter ${i+1} · ${FARBEN[i].text}` : z.auswahl);
-    setzen("auswahlWinkel", z.winkel==null ? "–" : z.winkel+"°");
+    if(!schieber.aktiv) setzen("auswahlWinkel", z.winkel==null ? "–" : z.winkel+"°");
   }
   $("auswahlMarke").hidden=!z.auswahlUngespeichert;
-  const proz = z.winkel==null ? 0 : Math.max(0,Math.min(100, z.winkel/180*100));
-  $("skalaFuell").style.width=proz+"%"; $("skalaKnopf").style.left=proz+"%";
+  if(!schieber.aktiv) schieberZeigen(z.winkel);   // beim Ziehen zeigt der Schieber den gezogenen Wert
+  $("skala").setAttribute("aria-disabled", schieberFrei() ? "false" : "true");
   $("btnPosListe").setAttribute("aria-expanded", posListeOffen ? "true" : "false");
   const pl=$("posListe"), namen=Object.keys(z.pos);
   pl.hidden = !posListeOffen || !namen.length;
@@ -1651,9 +1736,10 @@ function abzDialogZeigen(feldSetzen=true){
 // ================= Protokoll =================
 function jetzt(){ const d=new Date(); return d.toTimeString().slice(0,8)+"."+String(d.getMilliseconds()).padStart(3,"0"); }
 function logHinzu(text, klasse){
-  const zeit=jetzt();
-  logZeilen.push(`${zeit} ${klasse==="befehl"?"<":">"} ${text}`);
-  if(logZeilen.length>LOG_MAX) logZeilen.shift();
+  const zeit=jetzt(), zeile=`${zeit} ${klasse==="befehl"?"<":">"} ${text}`;
+  logZeilen.push(zeile);
+  if(logZeilen.length>LOG_MAX){ logZeilen.shift(); if(logSichtbarAb>0) logSichtbarAb--; }
+  if(AUTO_SPEICHERN && !autoSpeichernAus) logPuffer.push(zeile);
   const log=$("log"), unten=log.scrollHeight-log.scrollTop-log.clientHeight<30;
   const div=document.createElement("div");
   if(klasse) div.className=klasse;
@@ -1685,6 +1771,155 @@ function dateiSpeichern(inhalt, name, typ){
   setTimeout(()=>URL.revokeObjectURL(a.href),5000);
 }
 function logSpeichern(){ dateiSpeichern(logZeilen.join("\n")+"\n", `bt-bedienung-${dateiZeit()}.log`); }
+
+// Kopiert das Protokoll ab dem letzten "Leeren" in die Zwischenablage
+let logSichtbarAb=0;
+function logKopieren(){
+  const zeilen=logZeilen.slice(logSichtbarAb);
+  if(!zeilen.length){ meldung("Protokoll ist leer"); return; }
+  const text=zeilen.join("\n")+"\n";
+  const fertig=()=>meldung(`Protokoll kopiert (${zeilen.length} Zeilen)`);
+  if(navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(fertig).catch(()=>kopierenAlt(text, fertig));
+  else kopierenAlt(text, fertig);
+}
+function kopierenAlt(text, fertig){   // für Browser ohne Clipboard-API
+  const ta=document.createElement("textarea");
+  ta.value=text; ta.setAttribute("readonly",""); ta.style.position="fixed"; ta.style.opacity="0";
+  document.body.append(ta); ta.select();
+  try{ document.execCommand("copy") ? fertig() : meldung("Kopieren geht hier nicht"); }catch(e){ meldung("Kopieren geht hier nicht"); }
+  ta.remove();
+}
+
+// ================= Protokoll automatisch speichern (am PC über Bedienung.bat) =================
+// bedienung_server.py hängt die Zeilen an logs\bt-bedienung-JJMMTT-HHMMSS.log an.
+const AUTO_SPEICHERN = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) && !new URLSearchParams(location.search).has("demo");
+const logDateiName = `bt-bedienung-${dateiZeit()}.log`;
+let logPuffer=[], autoSpeichernAus=false, autoSpeichernOk=false;
+function logAutoSenden(beimSchliessen){
+  if(!AUTO_SPEICHERN || autoSpeichernAus || !logPuffer.length) return;
+  const text=logPuffer.join("\n")+"\n"; logPuffer=[];
+  const url=`/log?datei=${logDateiName}`;
+  if(beimSchliessen && navigator.sendBeacon){ navigator.sendBeacon(url, new Blob([text], {type:"text/plain;charset=utf-8"})); return; }
+  fetch(url, {method:"POST", body:text, headers:{"Content-Type":"text/plain;charset=utf-8"}})
+    .then(r=>{
+      if(!r.ok) throw new Error(r.status);
+      if(!autoSpeichernOk){ autoSpeichernOk=true; const p=$("logDatei"); p.hidden=false; p.textContent="Wird automatisch gespeichert: logs\\"+logDateiName; }
+    })
+    .catch(()=>{   // alter Server ohne Speicherfunktion oder Server beendet
+      autoSpeichernAus=true; logPuffer=[];
+      const p=$("logDatei"); p.hidden=false; p.textContent="Automatisches Speichern nicht möglich: Bedienung.bat neu starten oder „Speichern“ nutzen.";
+    });
+}
+if(AUTO_SPEICHERN){ setInterval(logAutoSenden, 2000); addEventListener("pagehide", ()=>logAutoSenden(true)); }
+
+// ================= Winkel-Schieber (Einrichtbetrieb) =================
+// Ziehen oder Antippen bewegt den gewählten Servo: Beim Ziehen geht höchstens alle
+// SCHIEBER_TAKT ms ein "w <Winkel>" raus, beim Loslassen immer der Endwert.
+const SCHIEBER_TAKT = 150;
+const schieber = {aktiv:false, winkel:null, gesendet:null, letzteZeit:0, timer:null};
+
+function schieberFrei(){ return z.einricht && (z.bereit || demoModus) && !!z.auswahl && z.winkel!=null; }
+function schieberZeigen(w){
+  const proz = w==null ? 0 : Math.max(0, Math.min(100, w/180*100));
+  $("skalaFuell").style.width=proz+"%"; $("skalaKnopf").style.left=proz+"%";
+  $("skala").setAttribute("aria-valuenow", w==null ? 0 : w);
+}
+function schieberWinkelAus(e){
+  const r=$("skala").getBoundingClientRect();
+  return Math.round(Math.max(0, Math.min(1, (e.clientX-r.left)/r.width)) * 180);
+}
+function schieberSenden(endwert){
+  const w=schieber.winkel;
+  if(w==null || w===schieber.gesendet) return;
+  const warten = SCHIEBER_TAKT - (Date.now()-schieber.letzteZeit);
+  clearTimeout(schieber.timer);
+  if(!endwert && warten>0){ schieber.timer=setTimeout(()=>schieberSenden(false), warten); return; }
+  schieber.letzteZeit=Date.now(); schieber.gesendet=w;
+  senden(`w ${w}`);
+}
+function schieberEinrichten(){
+  const s=$("skala");
+  s.addEventListener("pointerdown", e=>{
+    if(e.button!==0) return;
+    if(!schieberFrei()){ meldung(z.auswahl ? "Nicht verbunden" : "Erst einen Behälter oder die Schranke wählen"); return; }
+    e.preventDefault();
+    try{ s.setPointerCapture(e.pointerId); }catch(err){}   // Finger darf beim Ziehen die Skala verlassen
+    schieber.aktiv=true; schieber.gesendet=z.winkel; schieber.letzteZeit=0;
+    s.classList.add("zieht");
+    schieber.winkel=schieberWinkelAus(e);
+    schieberZeigen(schieber.winkel); setzen("auswahlWinkel", schieber.winkel+"°");
+    schieberSenden(false);
+  });
+  s.addEventListener("pointermove", e=>{
+    if(!schieber.aktiv) return;
+    const w=schieberWinkelAus(e);
+    if(w===schieber.winkel) return;
+    schieber.winkel=w;
+    schieberZeigen(w); setzen("auswahlWinkel", w+"°");
+    schieberSenden(false);
+  });
+  const loslassen = ()=>{
+    if(!schieber.aktiv) return;
+    schieber.aktiv=false; s.classList.remove("zieht");
+    schieberSenden(true);
+    if(schieber.winkel!=null) z.winkel=schieber.winkel;   // bis die Antwort kommt, nicht zurückspringen
+    anzeigen();
+  };
+  s.addEventListener("pointerup", loslassen);
+  s.addEventListener("pointercancel", loslassen);
+  s.addEventListener("lostpointercapture", loslassen);
+}
+
+// ================= Tastenkürzel (PC) =================
+function istEingabe(el){ return !!el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)); }
+let xGedrueckt=0;
+function tastenkuerzel(e){
+  if(istEingabe(e.target)){ if(e.key==="Escape") e.target.blur(); return; }
+  if(document.querySelector("dialog[open]")) return;            // Dialoge bedienen sich selbst (Esc schließt)
+  const k=e.key, strg=e.ctrlKey||e.metaKey;
+  const tun = f => { e.preventDefault(); if(!e.repeat) f(); };
+
+  if(strg && !e.altKey && k.toLowerCase()==="s"){                // nie den "Seite speichern"-Dialog
+    e.preventDefault();
+    if(z.einricht && !e.repeat) senden("s");
+    return;
+  }
+  if(strg || e.altKey) return;
+
+  // Überall
+  if(k==="?"){ tun(()=>$("dlgTasten").showModal()); return; }
+  if(k==="/"){ tun(()=>{ logKlappen(true); $("befehl").focus(); }); return; }
+  if(k==="p" || k==="P"){ tun(()=>$("btnLogZu").click()); return; }
+
+  if(z.einricht){
+    if(/^[1-7]$/.test(k)) return tun(()=>senden(k));
+    if(k==="ArrowLeft")  return tun(()=>senden(e.shiftKey ? "--" : "-"));
+    if(k==="ArrowRight") return tun(()=>senden(e.shiftKey ? "++" : "+"));
+    if(k==="+" || k==="-") return tun(()=>senden(k));
+    switch(k.toLowerCase()){
+      case "z": return tun(()=>senden("z"));
+      case "a": return tun(()=>senden("a"));
+      case "m": return tun(()=>senden("m"));
+      case "d": return tun(()=>senden("d"));
+      case "l": return tun(()=>senden("ls"));
+      case "x": return tun(()=>{
+        if(Date.now()-xGedrueckt<3000){ xGedrueckt=0; senden("x"); }
+        else { xGedrueckt=Date.now(); meldung("Nochmal X: Einrichtbetrieb beenden und sortieren"); }
+      });
+    }
+    return;
+  }
+
+  // Übersicht und Statistik
+  if(k===" ") return tun(()=>senden("p"));
+  switch(k.toLowerCase()){
+    case "q": return tun(()=>{ if(z.zustand==="FEHLER") senden("q"); else meldung("Kein Fehler zum Quittieren"); });
+    case "e": return tun(()=>senden("e"));
+    case "s": return tun(()=>{ ansicht==="statistik" ? zurUebersicht() : statistikOeffnen(); });
+    case "n": return tun(abzOeffnen);
+    case "r": return tun(()=>senden("status"));
+  }
+}
 
 // ================= Vorschau ohne Maschine =================
 function demo(){
