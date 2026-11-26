@@ -1082,10 +1082,10 @@ kbd{display:inline-block; min-width:26px; padding:3px 7px; border-radius:7px; ba
   <div id="ansichtEinricht" class="ansicht" hidden>
     <div class="einricht-info">
       <span class="pill" data-art="einricht"><span class="punkt"></span>Sortieren angehalten</span>
-      <span>Änderungen gelten bis zum Ausschalten</span>
+      <span>Änderungen gelten erst nach „Speichern“</span>
     </div>
     <div class="banner" id="ungespeichert" hidden>
-      <div class="t"><b>Ungespeicherte Änderungen</b><span>Erst mit Speichern dauerhaft im EEPROM</span></div>
+      <div class="t"><b>Ungespeicherte Änderungen</b><span>Ohne Speichern werden sie beim Beenden verworfen</span></div>
       <button class="k-warn" data-cmd="s">Speichern</button>
     </div>
 
@@ -1144,17 +1144,14 @@ kbd{display:inline-block; min-width:26px; padding:3px 7px; border-radius:7px; ba
 
       <div class="spalte">
         <section class="karte o2">
-          <h2>Farben einlernen</h2>
+          <h2>Farben</h2>
           <button class="k-weich k-mittel" data-cmd="m"><svg class="ic-klein"><use href="#i-messen"/></svg>Testmessung an der Schranke</button>
           <div class="ergebnis" id="messErgebnis" hidden>
             <i class="kugel" id="messFarbe"></i>
             <div class="t"><b id="messText">–</b><span class="mono" id="messWerte"></span></div>
           </div>
-          <span class="feldname">Kugel an der Schranke einlernen als</span>
-          <div class="ziel-gitter" id="lernFarben"></div>
-          <ul class="lern-info" id="lernInfo" hidden></ul>
-          <button class="k-weich k-mittel" id="btnFarbenVerwalten"><svg class="ic-klein"><use href="#i-regler"/></svg>Farben verwalten · Einlern-Assistent</button>
-          <p class="hinweistext">Kugel beim Einlernen nicht bewegen. Dauerhaft erst nach „Speichern“.</p>
+          <button class="k-akzent k-mittel" id="btnFarbenVerwalten"><svg class="ic-klein"><use href="#i-regler"/></svg>Farben einlernen &amp; verwalten</button>
+          <p class="hinweistext">Einlernen, Umbenennen und Tauschen der Behälter-Farben im Dialog bzw. Assistenten. Die Testmessung ändert nichts.</p>
         </section>
 
         <section class="karte o3">
@@ -1185,7 +1182,7 @@ kbd{display:inline-block; min-width:26px; padding:3px 7px; border-radius:7px; ba
           <button class="k-akzent k-mittel" data-cmd="s">Positionen und Farben speichern</button>
           <button class="k-rand" data-cmd="r" data-sicher>Standardpositionen laden</button>
           <button class="k-rand" data-cmd="rk" data-sicher>Farbwerte aus dem Code laden</button>
-          <p class="hinweistext">Geladene Werte gelten erst nach dem Speichern dauerhaft.</p>
+          <p class="hinweistext">Geladene Werte gelten erst nach dem Speichern, sonst werden sie beim Beenden verworfen.</p>
           <div class="trenner" style="margin:4px 0"></div>
           <button disabled>Bluetooth-Modul einrichten</button>
           <p class="hinweistext">Nur am USB-Monitor ohne Bluetooth-Verbindung möglich (Befehl bt).</p>
@@ -1193,7 +1190,7 @@ kbd{display:inline-block; min-width:26px; padding:3px 7px; border-radius:7px; ba
       </div>
     </div>
 
-    <button class="k-gross k-dunkel" data-cmd="x"><svg class="ic-klein"><use href="#i-weiter"/></svg>Beenden und sortieren</button>
+    <button class="k-gross k-dunkel" data-cmd="x"><svg class="ic-klein"><use href="#i-weiter"/></svg><span id="einrichtEndeText">Beenden und sortieren</span></button>
   </div>
 </main>
 
@@ -1581,7 +1578,7 @@ function menueZu(){ $("designMenue").hidden=true; $("btnDesign").setAttribute("a
 // ================= Aufbau =================
 // Farbabhängige Teile neu aufbauen (beim Start und wenn sich Namen/Reihenfolge ändern)
 function farbenAufbauen(){
-  $("farben").innerHTML=""; $("ziele").innerHTML=""; $("lernFarben").innerHTML="";
+  $("farben").innerHTML=""; $("ziele").innerHTML="";
   $$("#abzFarben [data-abz-farbe]:not([data-abz-farbe='0'])").forEach(b=>b.remove());
   FARBEN.forEach((f,i)=>{
     const kugel=`<i class="kugel" style="background:${f.farbe}"></i>`, text=esc(f.text);
@@ -1589,8 +1586,6 @@ function farbenAufbauen(){
       `<div class="farbzelle"><i class="kugel" style="background:${f.farbe}"></i><b class="zahlen" id="anz${i}">–</b><span>${text}</span></div>`);
     $("ziele").insertAdjacentHTML("beforeend",
       `<button class="ziel" data-cmd="${i+1}" data-ziel="${esc(f.name)}" aria-pressed="false">${kugel}${i+1} ${text}</button>`);
-    $("lernFarben").insertAdjacentHTML("beforeend",
-      `<button class="ziel" data-cmd="k ${i+1}">${kugel}${text}</button>`);
     $("abzFarben").insertAdjacentHTML("beforeend",
       `<button type="button" class="ziel" data-abz-farbe="${i+1}" aria-pressed="false"><i class="kugel gross" style="background:${f.farbe}"></i>${i+1} ${text}</button>`);
   });
@@ -1616,6 +1611,9 @@ function aufbauen(){
     const b=e.target.closest("button[data-cmd]");
     if(!b || b.disabled) return;
     if(b.hasAttribute("data-sicher") && !bestaetigen(b, b.dataset.frage)) return;
+    // Einrichtbetrieb mit ungespeicherten Änderungen verlassen: erst nachfragen (sie werden verworfen)
+    if(b.dataset.cmd==="x" && z.ungespeichert && !b.hasAttribute("data-sicher")
+       && !bestaetigen(b, "Nochmal tippen: Änderungen verwerfen und beenden")) return;
     senden(b.dataset.cmd);
   });
 
@@ -1989,6 +1987,7 @@ function verarbeiten(t){
   // Einrichtbetrieb
   if(t==="=== Einrichtbetrieb ==="){
     z.einricht=true; z.einrichtFolgt=false; posListeOffen=false;
+    z.ungespeichert=false; z.auswahlUngespeichert=false;   // der Arduino beginnt mit dem gespeicherten Stand
     if(modusPruefen){ modusPruefen=false; senden("l", true); }
     return;
   }
@@ -1997,7 +1996,16 @@ function verarbeiten(t){
     if(modusPruefen){ modusPruefen=false; senden("status", true); senden("csv", true); }
     return;
   }
-  if(t.startsWith("Einrichtbetrieb beendet")){ z.einricht=false; z.lsLive=false; return; }
+  if(t.startsWith("Nicht gespeicherte Aenderungen verworfen")){
+    z.ungespeichert=false; z.auswahlUngespeichert=false; z.pos={};
+    meldung("Nicht gespeicherte Änderungen verworfen – die vorherigen Werte gelten wieder");
+    return;
+  }
+  if(t.startsWith("Einrichtbetrieb beendet")){
+    z.einricht=false; z.lsLive=false; z.ungespeichert=false;
+    senden("csv", true);   // Farbnamen und Zähler neu holen (bei Verwerfen evtl. wieder die alten)
+    return;
+  }
   if(t.startsWith("Einrichtbetrieb startet")){ z.einrichtFolgt=true; return; }
   if((m=t.match(/^Summer (an|aus)/))){ z.summer=m[1]; return; }
   if(t.startsWith("Lichtschranken live")){ z.lsLive=true; return; }
@@ -2208,6 +2216,10 @@ function anzeigen(){
 
   // Einrichtbetrieb
   $("ungespeichert").hidden=!z.ungespeichert;
+  $("btnZurueckEinricht").dataset.frage = z.ungespeichert ? "Nochmal tippen: ungespeicherte Änderungen verwerfen und beenden"
+                                                          : "Nochmal tippen: Einrichtbetrieb beenden, das Sortieren startet.";
+  const endeText=$("einrichtEndeText");   // fehlt kurz, während der Knopf nachfragt
+  if(endeText) endeText.textContent = z.ungespeichert ? "Ohne Speichern beenden" : "Beenden und sortieren";
   $$("[data-ziel]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.ziel===z.auswahl ? "true" : "false"));
   if(z.auswahl){
     const i=farbIndex(z.auswahl);
@@ -2237,8 +2249,6 @@ function anzeigen(){
     setzen("messWerte", `R=${z.mess.r} G=${z.mess.g} B=${z.mess.b} · Abstand ${Math.round(z.mess.d1)} µs`
       + (vorsprung!=null ? ` · Vorsprung ${Math.round(vorsprung)} µs${vorsprung<KNAPP_VORSPRUNG ? " – knapp!" : ""}` : ""));
   }
-  $("lernInfo").hidden=!z.lern.length;
-  $("lernInfo").innerHTML=z.lern.map(l=>`<li class="${l.warn ? "warn" : ""}">${esc(l.text)}</li>`).join("");
   $("btnLsLive").setAttribute("aria-pressed", z.lsLive ? "true" : "false");
   lsKachel("ls1", z.ls1); lsKachel("ls2", z.ls2);
   $("lsVerlauf").hidden=!z.lsVerlauf.length;
@@ -2877,7 +2887,7 @@ function tastenkuerzel(e){
       case "l": return tun(()=>senden("ls"));
       case "x": return tun(()=>{
         if(Date.now()-xGedrueckt<3000){ xGedrueckt=0; senden("x"); }
-        else { xGedrueckt=Date.now(); meldung("Nochmal X: Einrichtbetrieb beenden und sortieren"); }
+        else { xGedrueckt=Date.now(); meldung(z.ungespeichert ? "Nochmal X: ungespeicherte Änderungen verwerfen und beenden" : "Nochmal X: Einrichtbetrieb beenden und sortieren"); }
       });
     }
     return;
