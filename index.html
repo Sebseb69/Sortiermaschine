@@ -439,6 +439,87 @@ dialog.sheet::backdrop{background:var(--abdunkeln)}
 .ziel .alle{background:conic-gradient(#2B2F2E 0 14%,#4A78C2 0 28%,#E2BE45 0 43%,#5E9E6A 0 57%,#8C6BC2 0 71%,#F7F7F4 0 86%,#CF5A4C 0)}
 .vorschau-befehl{align-self:center; font-size:12px; color:var(--leise); background:var(--kachel); border-radius:8px; padding:4px 10px}
 
+/* ================= Tempo-Verlauf (Diagramm) ================= */
+.diagramm{position:relative; touch-action:pan-y}
+.diagramm svg{display:block; width:100%; height:220px; overflow:visible}
+.d-gitter line{stroke:var(--linie); stroke-width:1}
+.d-achse text{fill:var(--leise); font-size:11px; font-weight:600; font-family:inherit}
+.d-linie{fill:none; stroke:var(--akzent); stroke-width:2; stroke-linejoin:round; stroke-linecap:round}
+.d-punkt{fill:var(--akzent); opacity:.3}
+.d-pause{fill:var(--kachel)}
+.d-ruetteln{stroke:var(--warn-punkt); stroke-width:2; stroke-linecap:round}
+.d-fehler{fill:var(--fehler); stroke:var(--flaeche); stroke-width:2}
+.d-fokus{stroke:var(--leise); stroke-width:1; stroke-dasharray:3 3}
+.d-fokuspunkt{fill:var(--akzent); stroke:var(--flaeche); stroke-width:2}
+.d-tip{position:absolute; top:0; pointer-events:none; background:var(--dunkel); color:var(--dunkel-auf); border-radius:10px; padding:6px 10px; font-size:12px; font-weight:600; line-height:1.4; white-space:nowrap; transform:translate(-50%,-100%); z-index:2}
+.d-legende{display:flex; flex-wrap:wrap; gap:6px 14px; font-size:12px; font-weight:600; color:var(--leise)}
+.d-legende span{display:inline-flex; align-items:center; gap:6px}
+.d-legende i{display:inline-block; width:16px; height:3px; border-radius:2px}
+.d-leer{display:grid; place-items:center; height:160px; background:var(--kachel); border-radius:14px; color:var(--leise); font-size:13px; font-weight:600; text-align:center; padding:0 16px}
+
+/* ================= Messqualität ================= */
+.qual{display:grid; grid-template-columns:minmax(0,1fr) auto auto auto; gap:10px 14px; align-items:center; font-size:13px}
+.qual .kz{font-size:11px; font-weight:700; color:var(--leise); letter-spacing:.04em}
+.qual .rechts{text-align:right; font-variant-numeric:tabular-nums; font-weight:700}
+.qual .rechts small{font-weight:600; color:var(--leise)}
+.q-name{display:flex; align-items:center; gap:8px; min-width:0; font-weight:700}
+.q-name .kugel{width:12px; height:12px}
+.q-status{display:inline-flex; align-items:center; justify-content:center; border-radius:8px; padding:3px 8px; font-size:11px; font-weight:800; white-space:nowrap}
+.q-status.gut{background:var(--akzent-weich); color:var(--akzent-dunkel)}
+.q-status.ok{background:var(--kachel); color:var(--leise)}
+.q-status.knapp{background:var(--warn-weich); color:var(--warn-text)}
+.q-status.leer{background:transparent; color:var(--aus-text)}
+.knapp-liste{display:flex; flex-direction:column; gap:6px; margin:0; padding:0; list-style:none}
+.knapp-liste li{display:flex; align-items:center; gap:8px; background:var(--warn-weich); color:var(--warn-text); border-radius:12px; padding:8px 12px; font-size:12px; font-weight:700}
+.knapp-liste li span:last-child{margin-left:auto; font-weight:600; white-space:nowrap}
+.spark{display:flex; flex-direction:column; gap:4px}
+.spark svg{display:block; width:100%; height:52px; overflow:visible}
+.spark .s-linie{fill:none; stroke:var(--akzent); stroke-width:2; stroke-linejoin:round}
+.spark .s-grenze{stroke:var(--fehler); stroke-width:1; stroke-dasharray:4 3}
+.spark .s-band{fill:var(--kachel)}
+
+/* ================= Testläufe ================= */
+.tabelle-scroll{overflow-x:auto; margin:0 -4px; padding:0 4px}
+.laeufe{width:100%; min-width:680px; border-collapse:collapse; font-size:13px}
+.laeufe th{text-align:right; font-size:11px; font-weight:700; color:var(--leise); padding:6px 8px; white-space:nowrap}
+.laeufe td{text-align:right; padding:6px 8px; border-top:1px solid var(--linie); font-variant-numeric:tabular-nums; white-space:nowrap}
+.laeufe th:first-child,.laeufe td:first-child{text-align:left; padding-left:0}
+.laeufe td:last-child{padding-right:0; width:44px}
+.laeufe .lauf-name{display:flex; flex-direction:column; gap:1px; min-width:150px}
+.laeufe .lauf-name input{border:0; background:transparent; font:inherit; font-weight:800; color:var(--text); padding:2px 4px; margin-left:-4px; border-radius:6px; width:100%}
+.laeufe .lauf-name input:hover{background:var(--kachel)}
+.laeufe .lauf-name span{font-size:11px; color:var(--leise)}
+.laeufe .bester{color:var(--akzent-dunkel); font-weight:800}
+.laeufe .schlechter{color:var(--fehler-text); font-weight:800}
+.laeufe button{width:36px; height:36px; min-height:36px; padding:0; border-radius:10px; background:transparent; color:var(--leise)}
+.laeufe button:hover:not(:disabled){background:var(--fehler-weich); color:var(--fehler-text)}
+.laeufe button.sicher{width:auto; padding:0 8px; font-size:11px}
+
+/* ================= Farben verwalten / Assistent ================= */
+@media (min-width:760px){ dialog.sheet.breit{width:560px} }
+.farbslot{display:grid; grid-template-columns:auto minmax(0,1fr) auto auto; gap:10px; align-items:center; background:var(--kachel); border-radius:16px; padding:8px 8px 8px 10px}
+.farbwahl{position:relative; width:40px; height:40px; display:grid; place-items:center; cursor:pointer; flex:none}
+.farbwahl input{position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; border:0; padding:0}
+.farbwahl .kugel{width:30px; height:30px}
+.slot-text{display:flex; flex-direction:column; gap:2px; min-width:0}
+.slot-text input{height:36px; border:0; box-shadow:inset 0 0 0 1.5px var(--rand); border-radius:10px; background:var(--flaeche); padding:0 10px; font:700 15px Manrope,"Segoe UI",system-ui,sans-serif; color:var(--text); width:100%; min-width:0}
+.slot-text span{font-size:11px; font-weight:700; color:var(--leise); padding-left:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.slot-text span.ok{color:var(--akzent-dunkel)}
+.slot-text span.warn{color:var(--warn-text)}
+.slot-text span.fehler{color:var(--fehler-text)}
+.farbslot .k-lernen{min-height:40px; padding:0 12px; font-size:13px; background:var(--flaeche)}
+.pfeile{display:flex; flex-direction:column; gap:2px}
+.pfeile button{width:32px; height:19px; min-height:19px; padding:0; border-radius:6px; background:var(--flaeche); font-size:11px; line-height:1}
+.assist-kopf{display:flex; flex-direction:column; gap:8px}
+.assist-farbe{display:flex; align-items:center; gap:16px; background:var(--kachel); border-radius:20px; padding:18px}
+.assist-farbe .kugel{width:56px; height:56px; flex:none}
+.assist-farbe .t{display:flex; flex-direction:column; gap:4px; min-width:0}
+.assist-farbe b{font-size:22px; font-weight:800}
+.assist-farbe span{font-size:13px; line-height:1.4; color:var(--leise)}
+.zusammenfassung{display:flex; flex-direction:column; gap:6px; margin:0; padding:0; list-style:none}
+.zusammenfassung li{display:flex; align-items:center; gap:10px; background:var(--kachel); border-radius:12px; padding:9px 12px; font-size:13px; font-weight:700}
+.zusammenfassung li span:last-child{margin-left:auto; font-size:12px; font-weight:700}
+
 /* ================= Tastenkürzel ================= */
 @media (hover:none),(pointer:coarse){ .nur-pc{display:none!important} }
 .tasten{display:flex; flex-direction:column; gap:6px}
@@ -664,6 +745,9 @@ kbd{display:inline-block; min-width:26px; padding:3px 7px; border-radius:7px; ba
         <div class="reihe"><label for="btnSummer">Summer</label>
           <button class="schalter" id="btnSummer" data-cmd="ton aus" aria-pressed="true" aria-label="Summer"></button>
         </div>
+        <div class="reihe"><label for="btnBenachr">Benachrichtigungen<br><small id="benachrInfo">bei Fehler, Magazin leer, Abzählziel</small></label>
+          <button class="schalter" id="btnBenachr" aria-pressed="false" aria-label="Benachrichtigungen"></button>
+        </div>
       </section>
     </div>
   </div>
@@ -684,6 +768,19 @@ kbd{display:inline-block; min-width:26px; padding:3px 7px; border-radius:7px; ba
         <div><span>Zykluszeit Ø</span><b class="zahlen" id="stZyklus">–</b></div>
         <div><span>Tempo</span><b class="zahlen" id="stTempo">–</b></div>
       </div>
+      <section class="karte">
+        <div class="karte-kopf">
+          <h2>Tempo-Verlauf</h2>
+          <span class="klein-fett" id="verlaufInfo">seit dem Verbinden</span>
+        </div>
+        <div class="diagramm" id="diagramm"></div>
+        <div class="d-legende" id="diagrammLegende">
+          <span><i style="background:var(--akzent)"></i>Kugeln/min (Mittel aus 5 Kugeln)</span>
+          <span><i style="background:var(--warn-punkt);width:3px;height:12px"></i>Trichter gerüttelt</span>
+          <span><i style="background:var(--fehler);width:9px;height:9px;border-radius:50%"></i>Fehler</span>
+          <span><i style="background:var(--kachel);height:12px;box-shadow:inset 0 0 0 1px var(--rand)"></i>Pause</span>
+        </div>
+      </section>
       <div class="spalten">
         <div class="spalte">
           <section class="karte o1">
@@ -694,6 +791,16 @@ kbd{display:inline-block; min-width:26px; padding:3px 7px; border-radius:7px; ba
             <div class="karte-kopf"><h2>Fehler</h2><span class="klein-fett" id="stFehlerSumme"></span></div>
             <div class="stapel" style="gap:10px" id="stFehler"></div>
             <p class="hinweistext" id="stFehlerNie"></p>
+          </section>
+          <section class="karte o5">
+            <div class="karte-kopf"><h2>Messqualität</h2><span class="klein-fett" id="qSumme">seit dem Verbinden</span></div>
+            <div class="qual" id="qTabelle"></div>
+            <ul class="knapp-liste" id="qKnapp" hidden></ul>
+            <div class="spark">
+              <div class="zeile-zwischen"><span class="feldname">Helligkeit (Mittel)</span><span class="klein-fett zahlen" id="qHell">–</span></div>
+              <svg id="qSpark" viewBox="0 0 300 52" preserveAspectRatio="none" aria-label="Verlauf der Helligkeit"></svg>
+            </div>
+            <p class="hinweistext">Abstand: wie weit eine Messung von der eingelernten Farbe weg ist (ab 100 µs gilt sie als unbekannt). Vorsprung: wie viel näher sie an ihrer Farbe liegt als an der zweitnächsten – unter 25 µs droht eine Verwechslung.</p>
           </section>
         </div>
         <div class="spalte">
@@ -714,6 +821,25 @@ kbd{display:inline-block; min-width:26px; padding:3px 7px; border-radius:7px; ba
       </div>
       <button class="k-mittel k-gefahr" data-cmd="reset" data-sicher><svg class="ic-klein"><use href="#i-reset"/></svg>Zähler und Statistik zurücksetzen</button>
     </div>
+
+    <section class="karte" id="karteLaeufe">
+      <div class="karte-kopf">
+        <h2>Testläufe vergleichen</h2>
+        <span class="klein-fett" id="laeufeAnzahl"></span>
+      </div>
+      <form class="feldzeile" id="formLauf">
+        <label class="sr" for="laufName">Name des Laufs</label>
+        <input class="feld" id="laufName" maxlength="40" placeholder="Name, z. B. neuer Trichter" autocomplete="off">
+        <button type="submit" class="k-akzent">Lauf speichern</button>
+      </form>
+      <div class="tabelle-scroll" id="laeufeRahmen" hidden><table class="laeufe" id="laeufe"></table></div>
+      <p class="hinweistext" id="laeufeLeer">Noch keine Läufe gespeichert. Gespeichert wird die aktuelle Statistik (seit Start oder Zähler-Reset). Bei „Magazin leer“ wird der Lauf automatisch gespeichert.</p>
+      <div class="gitter2" id="laeufeKnoepfe" hidden>
+        <button class="k-rand" id="btnLaeufeCsv"><svg class="ic-klein"><use href="#i-kopieren"/></svg>Als CSV kopieren</button>
+        <button class="k-gefahr" id="btnLaeufeLoeschen" data-frage="Nochmal tippen: alle Läufe löschen">Alle löschen</button>
+      </div>
+      <p class="hinweistext">Die Läufe werden nur in diesem Browser gespeichert (PC und Handy getrennt). Grün = bester Wert, rot = schlechtester.</p>
+    </section>
   </div>
 
   <!-- ================= Einrichtbetrieb ================= -->
@@ -791,6 +917,7 @@ kbd{display:inline-block; min-width:26px; padding:3px 7px; border-radius:7px; ba
           <span class="feldname">Kugel an der Schranke einlernen als</span>
           <div class="ziel-gitter" id="lernFarben"></div>
           <ul class="lern-info" id="lernInfo" hidden></ul>
+          <button class="k-weich k-mittel" id="btnFarbenVerwalten"><svg class="ic-klein"><use href="#i-regler"/></svg>Farben verwalten · Einlern-Assistent</button>
           <p class="hinweistext">Kugel beim Einlernen nicht bewegen. Dauerhaft erst nach „Speichern“.</p>
         </section>
 
@@ -918,6 +1045,60 @@ kbd{display:inline-block; min-width:26px; padding:3px 7px; border-radius:7px; ba
   </form>
 </dialog>
 
+<!-- ================= Farben verwalten / Einlern-Assistent ================= -->
+<dialog class="sheet breit" id="dlgFarben" aria-labelledby="dlgFarbenTitel">
+  <div class="sheet-inhalt">
+    <span class="griff" aria-hidden="true"></span>
+    <div class="sheet-kopf">
+      <div>
+        <h2 id="dlgFarbenTitel">Farben verwalten</h2>
+        <p id="dlgFarbenText">Die 7 Behälter behalten ihre Winkel. Hier legst du fest, welche Farbe in welchen Behälter kommt.</p>
+      </div>
+      <button type="button" class="k-symbol" id="btnFarbenZu" aria-label="Schließen"><svg class="ic"><use href="#i-schliessen"/></svg></button>
+    </div>
+
+    <!-- Liste aller Plätze -->
+    <div class="stapel" style="gap:8px" id="farbenListe"></div>
+    <p class="hinweistext" id="farbenHinweis">Name ändern: ins Feld tippen, Enter. Neue Farbe: Namen eintragen, Kugel an die Schranke legen, „Einlernen“. Die Pfeile tauschen eine Farbe mit dem Nachbarbehälter. Antippen der Kugel ändert nur die Anzeigefarbe hier. Am Ende „Speichern“.</p>
+
+    <!-- Assistent: Platz für Platz -->
+    <div class="stapel" style="gap:14px" id="assistent" hidden>
+      <div class="assist-kopf">
+        <div class="zeile-zwischen"><span class="feldname" id="aSchritt">Platz 1 von 7</span><span class="klein-fett" id="aFertig"></span></div>
+        <div class="balken"><div id="aBalken"></div></div>
+      </div>
+      <div id="aSchrittInhalt" class="stapel" style="gap:14px">
+        <div class="assist-farbe">
+          <i class="kugel" id="aKugel"></i>
+          <div class="t"><b id="aName">–</b><span id="aText">Kugel dieser Farbe an die Schranke legen, dann „Einlernen“.</span></div>
+        </div>
+        <div class="stapel" style="gap:6px">
+          <label class="feldname" for="aNameFeld">Andere Farbe für diesen Behälter? Neuen Namen eintragen:</label>
+          <div class="feldzeile">
+            <input class="feld" id="aNameFeld" maxlength="10" autocomplete="off" autocapitalize="off" spellcheck="false">
+            <button type="button" class="k-rand braucht-verbindung" id="aNameOk">Umbenennen</button>
+          </div>
+        </div>
+        <ul class="lern-info" id="aErgebnis" hidden></ul>
+        <button type="button" class="k-gross k-akzent braucht-verbindung" id="aLernen">Einlernen</button>
+        <div class="gitter2">
+          <button type="button" class="k-rand" id="aZurueck">Zurück</button>
+          <button type="button" class="k-rand" id="aWeiter">Überspringen</button>
+        </div>
+      </div>
+      <div id="aEnde" class="stapel" style="gap:12px" hidden>
+        <ul class="zusammenfassung" id="aZusammenfassung"></ul>
+        <p class="hinweistext">Erst „Speichern“ übernimmt Namen und Farbwerte dauerhaft ins EEPROM.</p>
+      </div>
+    </div>
+
+    <div class="gitter2">
+      <button type="button" class="k-mittel k-weich" id="btnAssistent">Assistent starten</button>
+      <button type="button" class="k-mittel k-akzent" data-cmd="s">Speichern</button>
+    </div>
+  </div>
+</dialog>
+
 <!-- ================= Tastenkürzel (PC) ================= -->
 <dialog class="sheet" id="dlgTasten" aria-labelledby="dlgTastenTitel">
   <div class="sheet-inhalt">
@@ -974,15 +1155,38 @@ const ARDUINO_BEREIT_MS = 2200;  // der Arduino nimmt Befehle erst ca. 1,5 s nac
 const LOG_ANZEIGE = 400;         // so viele Zeilen sichtbar
 const LOG_MAX = 50000;           // so viele Zeilen zum Speichern
 
-const FARBEN = [
-  {name:"Schwarz", text:"Schwarz", farbe:"#2B2F2E"},
-  {name:"Blau",    text:"Blau",    farbe:"#4A78C2"},
-  {name:"Gelb",    text:"Gelb",    farbe:"#E2BE45"},
-  {name:"Gruen",   text:"Grün",    farbe:"#5E9E6A"},
-  {name:"Lila",    text:"Lila",    farbe:"#8C6BC2"},
-  {name:"Weiss",   text:"Weiß",    farbe:"#F7F7F4"},
-  {name:"Rot",     text:"Rot",     farbe:"#CF5A4C"},
-];
+// Farben der 7 Behälter-Plätze: Namen und Reihenfolge kommen vom Arduino (CSV-Kopf,
+// Positionsliste "l"). Bekannte Namen haben feste Anzeigefarben, neue Farben bekommen
+// eine aus den Messwerten geschätzte Farbe (oder eine selbst gewählte, Farben-Dialog).
+const BEKANNTE_FARBEN = {
+  Schwarz:{text:"Schwarz", farbe:"#2B2F2E"}, Blau:{text:"Blau", farbe:"#4A78C2"}, Gelb:{text:"Gelb", farbe:"#E2BE45"},
+  Gruen:{text:"Grün", farbe:"#5E9E6A"}, Lila:{text:"Lila", farbe:"#8C6BC2"}, Weiss:{text:"Weiß", farbe:"#F7F7F4"},
+  Rot:{text:"Rot", farbe:"#CF5A4C"}, Orange:{text:"Orange", farbe:"#E8873A"}, Pink:{text:"Pink", farbe:"#E07BB0"},
+  Rosa:{text:"Rosa", farbe:"#F2B8CF"}, Braun:{text:"Braun", farbe:"#8A5A3B"}, Grau:{text:"Grau", farbe:"#9AA09D"},
+  Tuerkis:{text:"Türkis", farbe:"#3FB2AA"}, Hellblau:{text:"Hellblau", farbe:"#86B6E6"}, Hellgruen:{text:"Hellgrün", farbe:"#9CCB6E"},
+  Dunkelblau:{text:"Dunkelblau", farbe:"#2C4A86"}, Dunkelgruen:{text:"Dunkelgrün", farbe:"#2F6B45"}, Gold:{text:"Gold", farbe:"#C9A23A"},
+  Silber:{text:"Silber", farbe:"#C3C7CA"}, Beige:{text:"Beige", farbe:"#DCCBA8"}, Magenta:{text:"Magenta", farbe:"#C2449A"},
+};
+const STANDARD_NAMEN = ["Schwarz","Blau","Gelb","Gruen","Lila","Weiss","Rot"];
+const NAME_MUSTER = /^[A-Za-z][A-Za-z0-9-]{0,9}$/;   // wie im Arduino: 1-10 Zeichen, ohne Umlaute
+function eigeneFarben(){ try{ return JSON.parse(localStorage.getItem("sm-farben")||"{}"); }catch(e){ return {}; } }
+// Grobe Anzeigefarbe aus den Rohwerten des Sensors (kürzerer Puls = mehr Licht im Kanal)
+function farbeAusMessung(p){
+  const v=[820.9/p.r, 839.6/p.g, 669.0/p.b];          // Kanäle relativ zu Weiß
+  const max=Math.max(...v), min=Math.min(...v), mittel=(v[0]+v[1]+v[2])/3;
+  const hell=Math.round(Math.max(14, Math.min(88, (mittel-0.45)/0.65*80+10)));
+  if(max-min<0.03) return `hsl(0 0% ${hell}%)`;
+  const [r,g,b]=v.map(x=>(x-min)/(max-min));
+  const h = max===v[0] ? 60*(((g-b)/1)%6) : max===v[1] ? 60*((b-r)+2) : 60*((r-g)+4);
+  return `hsl(${Math.round((h+360)%360)} ${Math.round(Math.min(85,(max-min)*260))}% ${hell}%)`;
+}
+function farbeAus(name, ref){
+  const bekannt=BEKANNTE_FARBEN[name], eigen=eigeneFarben()[name];
+  return {name, text: bekannt ? bekannt.text : name,
+          farbe: eigen || (bekannt && bekannt.farbe) || (ref && ref.r ? farbeAusMessung(ref) : "#9AA09D")};
+}
+let FARBEN = STANDARD_NAMEN.map(n=>farbeAus(n));
+let farbenGeaendert=false;
 const THEMEN = [
   {id:"auto",     name:"Automatisch", vorschau:["#EDF1EC","#3F7D6E","#111816"]},
   {id:"salbei",   name:"Salbei",      vorschau:["#EDF1EC","#3F7D6E","#DDEBE5"]},
@@ -1009,7 +1213,7 @@ const FEHLER_INFO = [
   {muster:/Farbsensor|kein Signal/i,            kurz:"Farbsensor fehlt",        tipp:"Kein Signal vom Farbsensor. Kabel und Versorgung prüfen."},
 ];
 const KURZ_SCHOEN = {"LS1 pruefen":"LS1 prüfen", "Radsuche fehlg.":"Radsuche fehlgeschlagen"};
-const MELDUNGEN = /^(Kein Fehler aktiv|Kugel liegt noch|Nur in Pause|Unbekannter Befehl|WARNUNG|ACHTUNG|Gespeichert|Radsuche: |Fehler quittiert|Neustart|Selbsttest wird|Werte schwanken|Kein Signal|Farbwerte aus dem Code|Standardwerte geladen|Trichter geruettelt|Rad: |Summer: |Ungueltig|Schrittzahl|Farbnummer|Erst Handy|Lerne Farbe ein|Achtung: Aenderungen)/;
+const MELDUNGEN = /^(Kein Fehler aktiv|Kugel liegt noch|Nur in Pause|Unbekannter Befehl|WARNUNG|ACHTUNG|Gespeichert|Radsuche: |Fehler quittiert|Neustart|Selbsttest wird|Werte schwanken|Kein Signal|Farbwerte aus dem Code|Standardwerte geladen|Trichter geruettelt|Rad: |Summer: |Ungueltig|Schrittzahl|Farbnummer|Erst Handy|Achtung: Aenderungen|Platz \d+ heisst|Plaetze getauscht|Name |So geht|WATCHDOG)/;
 
 // ================= Zustand =================
 const z = {
@@ -1021,6 +1225,8 @@ const z = {
   lsLive:false, lsVerlauf:[], auswahl:null, winkel:null, auswahlUngespeichert:false, ungespeichert:false,
   pos:{}, mess:null, lern:[],
   stat:null, statFehler:[], statZeit:"", csvRoh:"",
+  verlauf:[], ereignisse:[], messungen:[], hellVerlauf:[],   // seit dem Verbinden (Diagramm, Messqualität)
+  lernStatus:[], lernAktuell:-1,                              // Einlernen je Platz (Assistent)
 };
 let ansicht="uebersicht", demoModus=false, verbindeHinweis="", posListeOffen=false;
 let geraet=null, kanal=null, ohneAntwort=false, manuellGetrennt=false;
@@ -1068,18 +1274,36 @@ function menueAuf(){ $("designMenue").hidden=false; $("btnDesign").setAttribute(
 function menueZu(){ $("designMenue").hidden=true; $("btnDesign").setAttribute("aria-expanded","false"); }
 
 // ================= Aufbau =================
-function aufbauen(){
+// Farbabhängige Teile neu aufbauen (beim Start und wenn sich Namen/Reihenfolge ändern)
+function farbenAufbauen(){
+  $("farben").innerHTML=""; $("ziele").innerHTML=""; $("lernFarben").innerHTML="";
+  $$("#abzFarben [data-abz-farbe]:not([data-abz-farbe='0'])").forEach(b=>b.remove());
   FARBEN.forEach((f,i)=>{
-    const kugel=`<i class="kugel" style="background:${f.farbe}"></i>`;
+    const kugel=`<i class="kugel" style="background:${f.farbe}"></i>`, text=esc(f.text);
     $("farben").insertAdjacentHTML("beforeend",
-      `<div class="farbzelle"><i class="kugel" style="background:${f.farbe}"></i><b class="zahlen" id="anz${i}">–</b><span>${f.text}</span></div>`);
+      `<div class="farbzelle"><i class="kugel" style="background:${f.farbe}"></i><b class="zahlen" id="anz${i}">–</b><span>${text}</span></div>`);
     $("ziele").insertAdjacentHTML("beforeend",
-      `<button class="ziel" data-cmd="${i+1}" data-ziel="${f.name}" aria-pressed="false">${kugel}${i+1} ${f.text}</button>`);
+      `<button class="ziel" data-cmd="${i+1}" data-ziel="${esc(f.name)}" aria-pressed="false">${kugel}${i+1} ${text}</button>`);
     $("lernFarben").insertAdjacentHTML("beforeend",
-      `<button class="ziel" data-cmd="k ${i+1}">${kugel}${f.text}</button>`);
+      `<button class="ziel" data-cmd="k ${i+1}">${kugel}${text}</button>`);
     $("abzFarben").insertAdjacentHTML("beforeend",
-      `<button type="button" class="ziel" data-abz-farbe="${i+1}" aria-pressed="false"><i class="kugel gross" style="background:${f.farbe}"></i>${i+1} ${f.text}</button>`);
+      `<button type="button" class="ziel" data-abz-farbe="${i+1}" aria-pressed="false"><i class="kugel gross" style="background:${f.farbe}"></i>${i+1} ${text}</button>`);
   });
+  if($("dlgFarben").open) farbenDialogZeigen();
+}
+// Platz i (0-6) heißt name; ref = Rohwerte der eingelernten Farbe (für die geschätzte Anzeigefarbe)
+function platzSetzen(i, name, ref){
+  if(i<0 || i>=7 || !name) return;
+  const alt=FARBEN[i];
+  const neueSchaetzung = ref && !BEKANNTE_FARBEN[name] && !eigeneFarben()[name];
+  if(!alt || alt.name!==name || neueSchaetzung){
+    const neu=farbeAus(name, ref);
+    if(!alt || alt.name!==neu.name || alt.farbe!==neu.farbe){ FARBEN[i]=neu; farbenGeaendert=true; }
+  }
+}
+
+function aufbauen(){
+  farbenAufbauen();
   themenAufbauen();
 
   // Alle Knöpfe mit data-cmd schicken ihren Befehl
@@ -1126,6 +1350,7 @@ function aufbauen(){
     senden(`v ${n}`);
   });
   schieberEinrichten();
+  zusatzEinrichten();
   $("btnPosListe").addEventListener("click", ()=>{
     posListeOffen=!posListeOffen;
     if(posListeOffen) senden("l");
@@ -1270,6 +1495,7 @@ async function verbindungWeg(){
   z.verbunden=false; z.bereit=false; kanal=null;
   anzeigen();
   if(warVerbunden) logInfo("Verbindung getrennt");
+  if(warVerbunden && !manuellGetrennt) melden("Verbindung verloren", "Die Bluetooth-Verbindung zur Sortiermaschine ist abgebrochen. Neuer Versuch läuft …");
   if(manuellGetrennt || !geraet) return;
   for(let versuch=1; versuch<=10 && !manuellGetrennt; versuch++){   // automatisch neu verbinden
     verbindeHinweis=`Versuch ${versuch} …`; anzeigen();
@@ -1319,7 +1545,24 @@ function zahl(t){ return parseFloat(String(t).replace(",", ".")); }
 
 function verarbeiten(t){
   let m;
-  if(erwarteFehlerGrund){ erwarteFehlerGrund=false; z.fehlerGrund=t; return; }   // Zeile nach "Neuer Zustand: FEHLER"
+  if(erwarteFehlerGrund){   // Zeile nach "Neuer Zustand: FEHLER"
+    erwarteFehlerGrund=false; z.fehlerGrund=t;
+    const f=fehlerInfo();
+    if(/Magazin leer/.test(t)){
+      melden("Magazin leer", "Kugeln nachfüllen, dann quittieren.");
+      if(z.stat) laufSpeichern("Lauf bis Magazin leer", true);   // die Statistik kam direkt davor
+    } else melden("Fehler: "+f.kurz, f.tipp);
+    return;
+  }
+
+  // Farbmessung im Betrieb: "Versuch 1: Rohwerte: R=.. G=.. B=.. | Erkannte Farbe: X (Abstand^2=..) | Zweite: Y (Abstand^2=..)"
+  if((m=t.match(/^Versuch (\d+): Rohwerte: R=([\d.]+) G=([\d.]+) B=([\d.]+) \| Erkannte Farbe: (\S+) \(Abstand\^2=([\d.]+)\)(?: \| Zweite: (\S+) \(Abstand\^2=([\d.]+)\))?/))){
+    const d1=Math.sqrt(+m[6]), d2=m[8]!=null ? Math.sqrt(+m[8]) : null;
+    z.messungen.push({zeit:Date.now(), versuch:+m[1], name:m[5], d1, zweite:m[7]||null, d2,
+                      unbekannt:/^Unbekannt/.test(m[5]), r:+m[2], g:+m[3], b:+m[4]});
+    if(z.messungen.length>3000) z.messungen.shift();
+    return;
+  }
 
   // Statusblock (Antwort auf "status")
   if(t==="=== Status ==="){ imStatus=true; return; }
@@ -1333,7 +1576,7 @@ function verarbeiten(t){
     else if((m=t.match(/^Fehler:\s+(.+)$/))) z.fehlerKurz=m[1].trim();
     else if((m=t.match(/^Kugeln:\s+(\d+)(?:, Tempo ([\d.]+)\/min)?/))){ z.kugeln=+m[1]; if(m[2]) z.tempo=zahl(m[2]); }
     else if(/^Abzaehlen:\s+aus/.test(t)) z.abz.ziel=0;
-    else if((m=t.match(/^Abzaehlen:\s+(\d+)\/(\d+)(?: (\w+))?/))){ z.abz.stand=+m[1]; z.abz.ziel=+m[2]; z.abz.farbe=m[3]||null; }
+    else if((m=t.match(/^Abzaehlen:\s+(\d+)\/(\d+)(?: ([A-Za-z][\w-]*))?/))){ z.abz.stand=+m[1]; z.abz.ziel=+m[2]; z.abz.farbe=m[3]||null; }
     else if((m=t.match(/^Radstellung:\s+(.+)$/))) z.rad=m[1].trim();
     else if((m=t.match(/^Leerdrehungen:\s+(\d+)(?:.*ab (\d+))?/))){ z.leer=+m[1]; if(m[2]) z.leerMax=+m[2]; }
     else if((m=t.match(/LS1[^:]*:\s*(belegt|frei).*LS2[^:]*:\s*(belegt|frei)/))){ z.ls1=m[1]; z.ls2=m[2]; }
@@ -1345,33 +1588,47 @@ function verarbeiten(t){
 
   if((m=t.match(/^Neuer Zustand: (\w+)/))){
     z.zustand=m[1];
-    if(m[1]==="FEHLER"){ erwarteFehlerGrund=true; z.fehlerKurz=""; z.fehlerGrund=""; }
+    if(m[1]==="FEHLER"){ erwarteFehlerGrund=true; z.fehlerKurz=""; z.fehlerGrund=""; z.ereignisse.push({zeit:Date.now(), art:"fehler"}); }
     else { z.fehlerKurz=""; z.fehlerGrund=""; }
     if(m[1]==="WARTEN") z.einricht=false;
     return;
   }
-  if((m=t.match(/^Kugel (\d+): (\w+)(?:, Zyklus ([\d.]+) s, Schnitt ([\d.]+))?/))){
+  if((m=t.match(/^Kugel (\d+): ([A-Za-z][\w-]*)(?:, Zyklus ([\d.]+) s, Schnitt ([\d.]+))?/))){
     z.kugeln=+m[1]; const i=farbIndex(m[2]);
     if(i>=0) z.anzahl[i]=(z.anzahl[i]||0)+1;
     if(m[4]) z.tempo=zahl(m[4]);
     z.letzte={nr:+m[1], farbe:i, name:m[2], zyklus:m[3] ? zahl(m[3]) : null};
+    z.verlauf.push({zeit:Date.now(), nr:+m[1], name:m[2], zyklus:z.letzte.zyklus});
+    if(z.verlauf.length>5000) z.verlauf.shift();
+    diagrammNeu=true;
     z.leer=0;
     return;
   }
-  if((m=t.match(/^WARTEN: (\d+) Drehungen ohne Kugel/))){ z.leer=+m[1]; return; }
+  if((m=t.match(/^WARTEN: (\d+) Drehungen ohne Kugel/))){
+    z.leer=+m[1];
+    if(/ruettle Trichter/.test(t)){ z.ereignisse.push({zeit:Date.now(), art:"ruetteln"}); diagrammNeu=true; }
+    return;
+  }
+  if(t.startsWith("WATCHDOG")){ melden("Arduino neu gestartet", "Der Watchdog hat einen Hänger erkannt."); meldung(t); }
   if(t.startsWith("WARTEN: Radstellung korrigiert")){ z.rad="bekannt, Kammer vor LS1"; return; }
   if(/Radstellung (unbekannt|unklar)/.test(t)) z.rad="unbekannt";
   if(t.startsWith("Radsuche: OK")) z.rad="bekannt";
-  if((m=t.match(/^Helligkeit: ([\d.]+) \(Mittel ([\d.]+)\)/))){ z.hell=zahl(m[2]); return; }
+  if((m=t.match(/^Helligkeit: ([\d.]+) \(Mittel ([\d.]+)\)/))){
+    z.hell=zahl(m[2]);
+    z.hellVerlauf.push({zeit:Date.now(), wert:zahl(m[1]), mittel:z.hell});
+    if(z.hellVerlauf.length>3000) z.hellVerlauf.shift();
+    return;
+  }
   if(t.startsWith("WARNUNG: Messwerte deutlich dunkler")) z.hellWarn=true;
   if(t.startsWith("Helligkeit wieder normal")){ z.hellWarn=false; return; }
 
   if(t.startsWith("Pause angefordert")){ z.pauseFolgt=true; return; }
-  if(t==="Pause"){ z.pause=true; z.pauseFolgt=false; return; }
-  if(t.startsWith("Pause beendet")){ z.pause=false; z.abz.erreicht=false; return; }
+  if(t==="Pause"){ z.pause=true; z.pauseFolgt=false; z.ereignisse.push({zeit:Date.now(), art:"pause"}); diagrammNeu=true; return; }
+  if(t.startsWith("Pause beendet")){ z.pause=false; z.abz.erreicht=false; z.ereignisse.push({zeit:Date.now(), art:"weiter"}); diagrammNeu=true; return; }
   if(t.startsWith("Pause abgebrochen")){ z.pauseFolgt=false; return; }
   if(t.startsWith("Zaehler und Statistik zurueckgesetzt") || t.startsWith("Neustart...") || t.startsWith("Programm:")){
     z.kugeln=0; z.tempo=null; z.anzahl=FARBEN.map(()=>0); z.abz.stand=0; z.abz.erreicht=false; z.stat=null; z.letzte=null;
+    z.verlauf=[]; z.ereignisse=[]; z.messungen=[]; z.hellVerlauf=[]; diagrammNeu=true;   // neuer Lauf
     if((m=t.match(/^Programm:\s+(\S+)/))){ z.programm=m[1]; z.abz.ziel=0; z.pause=false; z.pauseFolgt=false; z.einricht=false; }
     if(t.startsWith("Neustart")) meldung("Arduino startet neu …");
     if(t.startsWith("Zaehler")) meldung("Zähler und Statistik zurückgesetzt");
@@ -1379,13 +1636,18 @@ function verarbeiten(t){
   }
   if(t.startsWith("Abzaehlen")){
     if(/Abzaehlen aus|^Abzaehlen:\s+aus/.test(t)) { z.abz.ziel=0; z.abz.erreicht=false; }
-    else if(t.includes("Ziel erreicht")) { z.abz.erreicht=true; meldung("Abzählziel erreicht – Behälter leeren, dann „Weiter“"); }
-    else if((m=t.match(/Pause nach (\d+) Kugeln(?: der Farbe (\w+))?/))){ z.abz={ziel:+m[1], stand:0, farbe:m[2]||null, erreicht:false}; }
-    else if((m=t.match(/(\d+)\/(\d+)(?: (\w+))?/))){ z.abz.stand=+m[1]; z.abz.ziel=+m[2]; z.abz.farbe=m[3]||null; if(t.startsWith("Abzaehlen neu")) z.abz.erreicht=false; }
+    else if(t.includes("Ziel erreicht")) {
+      z.abz.erreicht=true; meldung("Abzählziel erreicht – Behälter leeren, dann „Weiter“");
+      melden("Abzählziel erreicht", `${z.abz.ziel} Kugeln${z.abz.farbe ? " "+farbText(z.abz.farbe) : ""} sortiert – Behälter leeren, dann „Weiter“.`);
+    }
+    else if((m=t.match(/Pause nach (\d+) Kugeln(?: der Farbe ([A-Za-z][\w-]*))?/))){ z.abz={ziel:+m[1], stand:0, farbe:m[2]||null, erreicht:false}; }
+    else if((m=t.match(/(\d+)\/(\d+)(?: ([A-Za-z][\w-]*))?/))){ z.abz.stand=+m[1]; z.abz.ziel=+m[2]; z.abz.farbe=m[3]||null; if(t.startsWith("Abzaehlen neu")) z.abz.erreicht=false; }
     return;
   }
   if(t.startsWith("CSV_Kopf;")){
     csvKopf=t.split(";"); z.csvKopfRoh=t;
+    const von=csvKopf.indexOf("Kugeln"), bis=csvKopf.indexOf("Zyklus_s");   // dazwischen: Farbnamen der Plätze
+    if(von>=0 && bis-von-1===7) csvKopf.slice(von+1,bis).forEach((n,i)=>platzSetzen(i, n, z.pos[n]));
     if(modusPruefen){ modusPruefen=false; z.einricht=false; senden("status", true); }   // Probe: Normalbetrieb
     return;
   }
@@ -1416,30 +1678,47 @@ function verarbeiten(t){
     z.ls1=m[2]; z.ls2=m[3]; return;
   }
   if((m=t.match(/LS1[^:]*:\s*(belegt|frei).*LS2[^:]*:\s*(belegt|frei)/))){ z.ls1=m[1]; z.ls2=m[2]; return; }
-  if((m=t.match(/^\d (Schwarz|Blau|Gelb|Gruen|Lila|Weiss|Rot): (\d+) Grad \| R=(\d+) G=(\d+) B=(\d+)/))){
-    z.pos[m[1]]={grad:+m[2], r:+m[3], g:+m[4], b:+m[5]}; return;
+  if((m=t.match(/^(\d) ([A-Za-z][\w-]*): (\d+) Grad \| R=([\d.]+) G=([\d.]+) B=([\d.]+)/))){   // Positionsliste "l"
+    const p={grad:+m[3], r:+m[4], g:+m[5], b:+m[6]};
+    z.pos[m[2]]=p; platzSetzen(+m[1]-1, m[2], p); return;
   }
   if((m=t.match(/^[za] (Schranke zu|Schranke auf): (\d+)/))){ z.pos[m[1]]={grad:+m[2]}; return; }
   if(t.startsWith("(ungespeicherte Aenderungen")){ z.ungespeichert=true; return; }
-  if((m=t.match(/^(Schwarz|Blau|Gelb|Gruen|Lila|Weiss|Rot|Schranke zu|Schranke auf): (\d+) Grad( \(nicht gespeichert\))?/))){
+  if((m=t.match(/^(Schranke zu|Schranke auf|[A-Za-z][\w-]*): (\d+) Grad( \(nicht gespeichert\))?$/))){
     z.auswahl=m[1]; z.winkel=+m[2]; z.auswahlUngespeichert=!!m[3];
     if(m[3]) z.ungespeichert=true;
     z.pos[m[1]]=Object.assign(z.pos[m[1]]||{}, {grad:+m[2]});
     return;
   }
-  if((m=t.match(/^Rohwerte: R=(\d+) G=(\d+) B=(\d+) \| Naechste Farbe: (\w+) \(Abstand\^2=([\d.]+)\)/))){
-    z.mess={r:+m[1], g:+m[2], b:+m[3], name:m[4], abstand:m[5]}; return;
+  if((m=t.match(/^Rohwerte: R=([\d.]+) G=([\d.]+) B=([\d.]+) \| Naechste Farbe: (\S+) \(Abstand\^2=([\d.]+)\)(?: \| Zweite: (\S+) \(Abstand\^2=([\d.]+)\))?/))){
+    z.mess={r:+m[1], g:+m[2], b:+m[3], name:m[4], abstand:m[5],
+            d1:Math.sqrt(+m[5]), zweite:m[6]||null, d2:m[7]!=null ? Math.sqrt(+m[7]) : null};
+    return;
   }
-  if(t.startsWith("Lerne Farbe ein")) z.lern=[];
-  if((m=t.match(/^(Schwarz|Blau|Gelb|Gruen|Lila|Weiss|Rot) neu: R=(\d+) G=(\d+) B=(\d+)(?: \(Abweichung zum alten Wert ([\d.]+) us\))?/))){
+  // Einlernen (k N): Ergebnis je Platz merken (Liste und Assistent im Farben-Dialog)
+  const lernSetzen = (zustand, text) => {
+    const i=z.lernAktuell; if(i<0) return;
+    const alt=z.lernStatus[i]||{};
+    z.lernStatus[i]={zustand: alt.zustand==="warn" && zustand==="ok" ? "warn" : zustand, text: text ?? alt.text ?? ""};
+  };
+  if((m=t.match(/^Lerne (\S+) ein/))){ z.lern=[]; z.lernAktuell=farbIndex(m[1]); lernSetzen("laeuft", "wird gemessen …"); return; }
+  if((m=t.match(/^([A-Za-z][\w-]*) neu: R=([\d.]+) G=([\d.]+) B=([\d.]+)(?: \(Abweichung zum alten Wert ([\d.]+) us\))?/))){
     z.lern.push({text:`${farbText(m[1])} eingelernt: R=${m[2]} G=${m[3]} B=${m[4]}`+(m[5] ? ` (Abweichung ${m[5]} µs)` : "")});
     z.ungespeichert=true;
     z.pos[m[1]]=Object.assign(z.pos[m[1]]||{}, {r:+m[2], g:+m[3], b:+m[4]});
+    const i=farbIndex(m[1]); if(i>=0) platzSetzen(i, m[1], z.pos[m[1]]);
+    lernSetzen("ok", "eingelernt");
     return;
   }
-  if((m=t.match(/^Naechste andere Farbe: (\w+), Abstand ([\d.]+) us/))){ z.lern.push({text:`Nächste andere Farbe: ${farbText(m[1])}, Abstand ${m[2]} µs`}); return; }
-  if(t.startsWith("ACHTUNG: sehr nah")) z.lern.push({text:"Sehr nah an dieser Farbe – Verwechslung möglich!", warn:true});
-  if(t.startsWith("Werte schwanken")) z.lern.push({text:t, warn:true});
+  if((m=t.match(/^Naechste andere Farbe: (\S+), Abstand ([\d.]+) us/))){
+    z.lern.push({text:`Nächste andere Farbe: ${farbText(m[1])}, Abstand ${m[2]} µs`});
+    const st=z.lernStatus[z.lernAktuell];
+    lernSetzen(st ? st.zustand : "ok", `eingelernt · nächste: ${farbText(m[1])} (${Math.round(+m[2])} µs)`);
+    return;
+  }
+  if(t.startsWith("ACHTUNG: sehr nah")){ z.lern.push({text:"Sehr nah an dieser Farbe – Verwechslung möglich!", warn:true}); lernSetzen("warn"); }
+  if(t.startsWith("Werte schwanken")){ z.lern.push({text:t, warn:true}); lernSetzen("fehler", "Werte schwankten – Kugel ruhig hinlegen, nochmal"); }
+  if(t.startsWith("Kein Signal vom Farbsensor, abgebrochen")) lernSetzen("fehler", "kein Signal vom Farbsensor");
   if(t.startsWith("Mit s speichern") || t.startsWith("Standardwerte geladen") || t.startsWith("Farbwerte aus dem Code geladen")) z.ungespeichert=true;
   if(t.startsWith("Gespeichert")){ z.ungespeichert=false; z.auswahlUngespeichert=false; }
 
@@ -1459,6 +1738,7 @@ function csvAuswerten(w){
   if(s.Kugeln_pro_min) z.tempo=zahl(s.Kugeln_pro_min);
   if(s.Programm) z.programm=s.Programm;
   if(s.Helligkeit) z.hell=zahl(s.Helligkeit);
+  if(laufWartetAufCsv!=null){ const n=laufWartetAufCsv; laufWartetAufCsv=null; laufSpeichern(n); }   // "Lauf speichern" wartete auf frische Werte
 }
 
 function fehlerInfo(){
@@ -1479,6 +1759,7 @@ function dauer(sek){
 function setzen(id, text){ const e=$(id); if(e.textContent!==String(text)) e.textContent=text; }
 
 function anzeigen(){
+  if(farbenGeaendert){ farbenGeaendert=false; farbenAufbauen(); }
   const aktiv = z.verbunden && z.bereit;
   const fehler = z.verbunden && z.zustand==="FEHLER" && !z.einricht;
   const zeigEinricht = z.einricht;
@@ -1579,8 +1860,8 @@ function anzeigen(){
     $("abzBalken").style.width=Math.min(100, a.stand/a.ziel*100)+"%";
     $("abzBalken").style.background = a.farbe && farbIndex(a.farbe)>=0 && a.farbe!=="Weiss" ? FARBEN[farbIndex(a.farbe)].farbe : "var(--akzent)";
     setzen("abzIst", a.stand); setzen("abzZiel", a.ziel);
-    const r=Math.max(0,a.ziel-a.stand);
-    setzen("abzRest", a.erreicht ? "Behälter leeren, dann „Weiter“" : `noch ${r} ${r===1 ? "Kugel" : "Kugeln"}`);
+    const r=Math.max(0,a.ziel-a.stand), eta=restzeit(r, a.farbe);
+    setzen("abzRest", a.erreicht ? "Behälter leeren, dann „Weiter“" : `noch ${r} ${r===1 ? "Kugel" : "Kugeln"}${eta ? " · ca. "+eta : ""}`);
   }
 
   // Maschine
@@ -1594,6 +1875,7 @@ function anzeigen(){
   sm.dataset.cmd = z.summer==="aus" ? "ton an" : "ton aus";
   sm.setAttribute("aria-pressed", z.summer==="aus" ? "false" : "true");
   sm.title = z.summer==="aus" ? "Summer ist aus – antippen zum Einschalten" : "Summer ist an – antippen zum Ausschalten";
+  $("btnBenachr").setAttribute("aria-pressed", benachrAn() ? "true" : "false");
 
   // Einrichtbetrieb
   $("ungespeichert").hidden=!z.ungespeichert;
@@ -1621,8 +1903,10 @@ function anzeigen(){
   if(z.mess){
     const i=farbIndex(z.mess.name);
     $("messFarbe").style.background = i>=0 ? FARBEN[i].farbe : "transparent";
-    setzen("messText", "Nächste Farbe: "+farbText(z.mess.name));
-    setzen("messWerte", `R=${z.mess.r} G=${z.mess.g} B=${z.mess.b} · Abstand² ${z.mess.abstand}`);
+    const vorsprung = z.mess.d2!=null ? z.mess.d2-z.mess.d1 : null;
+    setzen("messText", "Nächste Farbe: "+farbText(z.mess.name) + (z.mess.zweite ? ` · zweite: ${farbText(z.mess.zweite)}` : ""));
+    setzen("messWerte", `R=${z.mess.r} G=${z.mess.g} B=${z.mess.b} · Abstand ${Math.round(z.mess.d1)} µs`
+      + (vorsprung!=null ? ` · Vorsprung ${Math.round(vorsprung)} µs${vorsprung<KNAPP_VORSPRUNG ? " – knapp!" : ""}` : ""));
   }
   $("lernInfo").hidden=!z.lern.length;
   $("lernInfo").innerHTML=z.lern.map(l=>`<li class="${l.warn ? "warn" : ""}">${esc(l.text)}</li>`).join("");
@@ -1637,6 +1921,7 @@ function anzeigen(){
   live.lastElementChild.textContent = demoModus ? "Demo" : z.verbunden ? "live" : "getrennt";
 
   if(zeigStat) statistikZeigen();
+  if($("dlgFarben").open) farbenDialogZeigen();
 }
 
 function lsChip(id, name, wert){
@@ -1650,7 +1935,9 @@ function lsKachel(id, wert){
 
 function statistikZeigen(){
   const s=z.stat;
+  laeufeZeigen();
   $("statLeer").hidden=!!s; $("statInhalt").hidden=!s;
+  if(s){ qualitaetZeigen(); if(diagrammNeu) requestAnimationFrame(diagrammZeichnen); }
   setzen("statStand", "Seit Start oder Zähler-Reset · " + (s ? "Stand "+z.statZeit.slice(0,5) : "noch keine Daten"));
   if(!s) return;
   $("stLaufzeit").innerHTML = dauer(+s.Laufzeit_s||0);
@@ -1812,6 +2099,363 @@ function logAutoSenden(beimSchliessen){
 }
 if(AUTO_SPEICHERN){ setInterval(logAutoSenden, 2000); addEventListener("pagehide", ()=>logAutoSenden(true)); }
 
+// ================= Messqualität =================
+const KNAPP_ABSTAND = 75;     // µs: nahe an der Grenze (ab 100 µs gilt eine Messung als unbekannt)
+const KNAPP_VORSPRUNG = 25;   // µs: nur so viel näher als die zweitnächste Farbe = Verwechslungsgefahr
+let diagrammNeu = true;
+
+function qualitaetZeigen(){
+  const nachFarbe=FARBEN.map(()=>[]); let unbekannt=0;
+  z.messungen.forEach(x=>{ if(x.unbekannt){ unbekannt++; return; } const i=farbIndex(x.name); if(i>=0) nachFarbe[i].push(x); });
+  setzen("qSumme", z.messungen.length ? `${z.messungen.length} Messungen${unbekannt ? ` · ${unbekannt} unbekannt` : ""}` : "seit dem Verbinden");
+  let html=`<span class="kz">FARBE</span><span class="kz rechts">ABSTAND Ø / MAX</span><span class="kz rechts">VORSPRUNG</span><span class="kz rechts"></span>`;
+  FARBEN.forEach((f,i)=>{
+    const l=nachFarbe[i], name=`<span class="q-name"><i class="kugel" style="background:${f.farbe}"></i>${esc(f.text)}${l.length ? ` <small class="leise">${l.length}×</small>` : ""}</span>`;
+    if(!l.length){ html+=name+`<span class="rechts"><small>–</small></span><span class="rechts"><small>–</small></span><span class="rechts"><span class="q-status leer">keine</span></span>`; return; }
+    const ds=l.map(x=>x.d1), mittel=ds.reduce((a,b)=>a+b,0)/ds.length, max=Math.max(...ds);
+    const vs=l.filter(x=>x.d2!=null).map(x=>x.d2-x.d1), vmin=vs.length ? Math.min(...vs) : null;
+    const knapp = max>=KNAPP_ABSTAND || (vmin!=null && vmin<KNAPP_VORSPRUNG);
+    const sicher = max<KNAPP_ABSTAND*0.7 && (vmin==null || vmin>=KNAPP_VORSPRUNG*2);
+    const st = knapp ? ["knapp","knapp"] : sicher ? ["gut","sicher"] : ["ok","ok"];
+    html+=name+`<span class="rechts">${Math.round(mittel)} / ${Math.round(max)} <small>µs</small></span>`
+      +`<span class="rechts">${vmin==null ? "<small>–</small>" : `min. ${Math.round(vmin)} <small>µs</small>`}</span>`
+      +`<span class="rechts"><span class="q-status ${st[0]}">${st[1]}</span></span>`;
+  });
+  $("qTabelle").innerHTML=html;
+  const knappe=z.messungen.filter(x=>!x.unbekannt && (x.d1>=KNAPP_ABSTAND || (x.d2!=null && x.d2-x.d1<KNAPP_VORSPRUNG))).slice(-5).reverse();
+  $("qKnapp").hidden=!knappe.length;
+  $("qKnapp").innerHTML=knappe.map(x=>`<li><span>${esc(farbText(x.name))}${x.zweite ? " ↔ "+esc(farbText(x.zweite)) : ""}</span>`
+    +`<span>Abstand ${Math.round(x.d1)} · Vorsprung ${x.d2!=null ? Math.round(x.d2-x.d1) : "–"} µs · ${new Date(x.zeit).toTimeString().slice(0,5)}</span></li>`).join("");
+  sparkZeichnen();
+}
+
+// Kleiner Verlauf der Helligkeit (Mittelwert); gestrichelt: Warngrenze 1,040
+function sparkZeichnen(){
+  const svg=$("qSpark"), d=z.hellVerlauf;
+  setzen("qHell", z.hell==null ? "–" : komma(z.hell,3)+(z.hell>1.04 ? " · reinigen!" : ""));
+  if(d.length<2){ svg.innerHTML=""; return; }
+  const W=300, H=52, werte=d.map(x=>x.mittel);
+  const lo=Math.min(0.97,...werte), hi=Math.max(1.06,...werte);
+  const y=v=>(H-3-(v-lo)/(hi-lo)*(H-6)).toFixed(1), x=i=>(i/(d.length-1)*W).toFixed(1);
+  svg.innerHTML=`<line class="s-grenze" x1="0" x2="${W}" y1="${y(1.04)}" y2="${y(1.04)}" vector-effect="non-scaling-stroke"/>`
+    +`<polyline class="s-linie" vector-effect="non-scaling-stroke" points="${werte.map((v,i)=>x(i)+","+y(v)).join(" ")}"/>`;
+}
+
+// ================= Tempo-Verlauf =================
+let diagrammDaten=null;
+function diagrammZeichnen(){
+  diagrammNeu=false;
+  const box=$("diagramm");
+  if(!box || box.offsetParent===null){ diagrammNeu=true; return; }       // gerade unsichtbar: später
+  const pts=z.verlauf.filter(p=>p.zyklus!=null && p.zyklus>0).sort((a,b)=>a.zeit-b.zeit);
+  setzen("verlaufInfo", z.verlauf.length ? `${z.verlauf.length} Kugeln seit dem Verbinden` : "seit dem Verbinden");
+  if(pts.length<2){
+    diagrammDaten=null;
+    box.innerHTML=`<div class="d-leer">Das Diagramm füllt sich, sobald nach dem Verbinden Kugeln sortiert werden.</div>`;
+    return;
+  }
+  const W=Math.max(280, box.clientWidth), H=220, L=30, R=10, T=12, B=26, pw=W-L-R, ph=H-T-B;
+  const roh=pts.map(p=>({zeit:p.zeit, wert:60/p.zyklus, p}));
+  const daten=roh.map((r,i)=>{ const a=roh.slice(Math.max(0,i-4), i+1); return {...r, mittel:a.reduce((s,x)=>s+x.wert,0)/a.length}; });
+  const t0=daten[0].zeit, t1=Math.max(daten[daten.length-1].zeit, ...z.ereignisse.map(e=>e.zeit)), dt=Math.max(1, t1-t0);
+  const ymax=Math.max(10, Math.ceil(Math.max(...daten.map(d=>d.mittel))/10)*10);
+  const X=t=>L+(t-t0)/dt*pw, Y=v=>T+ph-Math.min(v,ymax)/ymax*ph;
+  let svg="";
+  // Pausen als Flächen
+  let pauseAb=null;
+  z.ereignisse.filter(e=>e.zeit>=t0).forEach(e=>{
+    if(e.art==="pause") pauseAb=e.zeit;
+    if(e.art==="weiter" && pauseAb!=null){ svg+=`<rect class="d-pause" x="${X(pauseAb)}" y="${T}" width="${Math.max(2,X(e.zeit)-X(pauseAb))}" height="${ph}"/>`; pauseAb=null; }
+  });
+  if(pauseAb!=null) svg+=`<rect class="d-pause" x="${X(pauseAb)}" y="${T}" width="${Math.max(2,L+pw-X(pauseAb))}" height="${ph}"/>`;
+  // Gitter und Achsen
+  svg+=`<g class="d-gitter">`+[0, ymax/2, ymax].map(v=>`<line x1="${L}" x2="${L+pw}" y1="${Y(v)}" y2="${Y(v)}"/>`).join("")+`</g>`;
+  svg+=`<g class="d-achse">`+[0, ymax/2, ymax].map(v=>`<text x="${L-6}" y="${Y(v)+4}" text-anchor="end">${v}</text>`).join("");
+  const zeitText=t=>new Date(t).toTimeString().slice(0,5);
+  svg+=`<text x="${L}" y="${H-6}">${zeitText(t0)}</text><text x="${L+pw/2}" y="${H-6}" text-anchor="middle">${zeitText(t0+dt/2)}</text><text x="${L+pw}" y="${H-6}" text-anchor="end">${zeitText(t1)}</text></g>`;
+  // Einzelwerte (blass) und gleitendes Mittel (Linie, Lücken bei langen Pausen)
+  svg+=daten.map(d=>`<circle class="d-punkt" cx="${X(d.zeit).toFixed(1)}" cy="${Y(d.wert).toFixed(1)}" r="2.5"/>`).join("");
+  let pfad="";
+  daten.forEach((d,i)=>{ const neu = i===0 || d.zeit-daten[i-1].zeit>20000; pfad+=`${neu?"M":"L"}${X(d.zeit).toFixed(1)},${Y(d.mittel).toFixed(1)}`; });
+  svg+=`<path class="d-linie" d="${pfad}"/>`;
+  // Ereignisse: Rütteln unten als Striche, Fehler oben als Punkte
+  z.ereignisse.filter(e=>e.zeit>=t0).forEach(e=>{
+    if(e.art==="ruetteln") svg+=`<line class="d-ruetteln" x1="${X(e.zeit)}" x2="${X(e.zeit)}" y1="${T+ph}" y2="${T+ph-10}"/>`;
+    if(e.art==="fehler") svg+=`<circle class="d-fehler" cx="${X(e.zeit)}" cy="${T+6}" r="5"/>`;
+  });
+  svg+=`<line class="d-fokus" id="dFokus" x1="0" x2="0" y1="${T}" y2="${T+ph}" visibility="hidden"/><circle class="d-fokuspunkt" id="dFokusPunkt" r="5" visibility="hidden"/>`;
+  box.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Kugeln pro Minute im Verlauf">${svg}</svg><div class="d-tip" id="dTip" hidden></div>`;
+  diagrammDaten={daten, X, Y};
+}
+function diagrammHover(e){
+  if(!diagrammDaten) return;
+  const box=$("diagramm"), r=box.getBoundingClientRect(), x=e.clientX-r.left;
+  const {daten, X, Y}=diagrammDaten;
+  let best=daten[0]; daten.forEach(d=>{ if(Math.abs(X(d.zeit)-x)<Math.abs(X(best.zeit)-x)) best=d; });
+  const fx=X(best.zeit), fy=Y(best.mittel), tip=$("dTip");
+  $("dFokus").setAttribute("x1",fx); $("dFokus").setAttribute("x2",fx); $("dFokus").setAttribute("visibility","visible");
+  $("dFokusPunkt").setAttribute("cx",fx); $("dFokusPunkt").setAttribute("cy",fy); $("dFokusPunkt").setAttribute("visibility","visible");
+  tip.hidden=false;
+  tip.innerHTML=`Kugel ${best.p.nr} · ${esc(farbText(best.p.name))}<br>${komma(best.mittel,1)}/min · Zyklus ${komma(best.p.zyklus,2)} s · ${new Date(best.zeit).toTimeString().slice(0,8)}`;
+  tip.style.left=Math.max(70, Math.min(r.width-70, fx))+"px"; tip.style.top=Math.max(40, fy)+"px";
+}
+function diagrammHoverWeg(){
+  if(!diagrammDaten) return;
+  $("dTip").hidden=true; $("dFokus").setAttribute("visibility","hidden"); $("dFokusPunkt").setAttribute("visibility","hidden");
+}
+
+// ================= Restzeit beim Abzählen =================
+function restzeit(rest, farbe){
+  if(!rest || !z.tempo) return "";
+  let rate=z.tempo;                                         // Kugeln pro Minute insgesamt
+  if(farbe){                                                // nur eine Farbe: Anteil dieser Farbe bisher
+    const i=farbIndex(farbe), summe=z.anzahl.reduce((a,b)=>a+(b||0),0);
+    if(i<0 || summe<5 || !z.anzahl[i]) return "";
+    rate*=z.anzahl[i]/summe;
+  }
+  const sek=rest/rate*60;
+  return sek<60 ? `${Math.max(5,Math.round(sek/5)*5)} s` : sek<3600 ? `${Math.round(sek/60)} min` : `${Math.floor(sek/3600)} h ${Math.round(sek%3600/60)} min`;
+}
+
+// ================= Testläufe =================
+const LAEUFE_SCHLUESSEL="sm-laeufe";
+let laufWartetAufCsv=null;
+function laeufeLaden(){ try{ return JSON.parse(localStorage.getItem(LAEUFE_SCHLUESSEL)||"[]"); }catch(e){ return []; } }
+function laeufeSichern(l){ try{ localStorage.setItem(LAEUFE_SCHLUESSEL, JSON.stringify(l)); }catch(e){ meldung("Speichern im Browser nicht möglich"); } }
+function laufSpeichern(name, auto){
+  if(!z.stat){ meldung("Noch keine Statistik – erst verbinden"); return; }
+  const l=laeufeLaden(), letzter=l[l.length-1];
+  if(letzter && letzter.werte.Laufzeit_s===z.stat.Laufzeit_s && letzter.werte.Kugeln===z.stat.Kugeln){ if(!auto) meldung("Dieser Stand ist schon gespeichert"); return; }
+  l.push({id:Date.now(), name:name || `Lauf ${l.length+1}`, zeit:new Date().toISOString(), programm:z.programm,
+          kopf:csvKopf ? csvKopf.slice(1) : Object.keys(z.stat), werte:{...z.stat}});
+  while(l.length>50) l.shift();
+  laeufeSichern(l);
+  meldung(auto ? `Lauf automatisch gespeichert: „${name}“` : `Lauf „${name}“ gespeichert`);
+  laeufeZeigen();
+}
+function dauerKurz(sek){ sek=Math.round(sek||0); const h=Math.floor(sek/3600), m=Math.floor(sek%3600/60), s=sek%60; return h ? `${h} h ${m} min` : m ? `${m}:${String(s).padStart(2,"0")} min` : `${s} s`; }
+function laufFehler(x){
+  const k=x.kopf||[], von=k.indexOf("Doppelt"), bis=k.indexOf("Helligkeit");
+  return von>=0 && bis>von ? k.slice(von+1,bis).reduce((s,n)=>s+(+x.werte[n]||0),0) : null;
+}
+const LAUF_SPALTEN = [
+  {titel:"Kugeln",          wert:x=>zahl(x.werte.Kugeln),            text:v=>v},
+  {titel:"Laufzeit",        wert:x=>zahl(x.werte.Laufzeit_s),        text:v=>dauerKurz(v)},
+  {titel:"Kugeln/min",      wert:x=>zahl(x.werte.Kugeln_pro_min),    text:v=>komma(v,1), besser:"hoch"},
+  {titel:"Ø Zyklus",        wert:x=>zahl(x.werte.Zyklus_s),          text:v=>komma(v,2)+" s", besser:"niedrig"},
+  {titel:"Rütteln / 10 Kugeln", wert:x=>{ const k=zahl(x.werte.Kugeln); return k ? zahl(x.werte.Ruetteln_Trichter)/k*10 : NaN; }, text:v=>komma(v,1), besser:"niedrig"},
+  {titel:"Neu gemessen",    wert:x=>zahl(x.werte.Neu_gemessen),      text:v=>v, besser:"niedrig"},
+  {titel:"Fehler",          wert:laufFehler,                          text:v=>v, besser:"niedrig"},
+  {titel:"Helligkeit",      wert:x=>zahl(x.werte.Helligkeit),        text:v=>komma(v,3)},
+];
+function laeufeZeigen(){
+  const l=laeufeLaden();
+  setzen("laeufeAnzahl", l.length ? `${l.length} gespeichert` : "");
+  $("laeufeLeer").hidden=!!l.length; $("laeufeRahmen").hidden=!l.length; $("laeufeKnoepfe").hidden=!l.length;
+  if(!l.length || $("laeufe").contains(document.activeElement)) return;    // nicht beim Umbenennen neu zeichnen
+  const extreme=LAUF_SPALTEN.map(s=>{
+    const w=l.map(s.wert).filter(v=>v!=null && !isNaN(v));
+    if(!s.besser || w.length<2 || Math.min(...w)===Math.max(...w)) return null;
+    return s.besser==="hoch" ? {gut:Math.max(...w), schlecht:Math.min(...w)} : {gut:Math.min(...w), schlecht:Math.max(...w)};
+  });
+  const zeit=iso=>{ const d=new Date(iso); return d.toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"})+" "+d.toTimeString().slice(0,5); };
+  $("laeufe").innerHTML = `<thead><tr><th>Lauf</th>${LAUF_SPALTEN.map(s=>`<th>${s.titel}</th>`).join("")}<th></th></tr></thead><tbody>`
+    + l.slice().reverse().map(x=>`<tr><td><div class="lauf-name"><input data-lauf="${x.id}" value="${esc(x.name)}" maxlength="40" aria-label="Name des Laufs"><span>${zeit(x.zeit)}${x.programm ? " · "+esc(x.programm) : ""}</span></div></td>`
+      + LAUF_SPALTEN.map((s,i)=>{ const v=s.wert(x), e=extreme[i];
+          const kl = e && v===e.gut ? "bester" : e && v===e.schlecht ? "schlechter" : "";
+          return `<td class="${kl}">${v==null || isNaN(v) ? "–" : esc(s.text(v))}</td>`; }).join("")
+      + `<td><button data-lauf-weg="${x.id}" data-frage="Löschen?" title="Lauf löschen" aria-label="Lauf löschen"><svg class="ic-klein"><use href="#i-schliessen"/></svg></button></td></tr>`).join("")
+    + `</tbody>`;
+}
+function laeufeCsv(){
+  const l=laeufeLaden(); if(!l.length) return;
+  const kopf=[...new Set(l.flatMap(x=>x.kopf||Object.keys(x.werte)))].filter(k=>k!=="Programm");
+  const zeilen=[["Name","Datum","Programm",...kopf].join(";"),
+    ...l.map(x=>[x.name.replace(/;/g,","), new Date(x.zeit).toLocaleString("de-DE"), x.programm||"", ...kopf.map(k=>x.werte[k]??"")].join(";"))];
+  const text=zeilen.join("\n")+"\n";
+  const fertig=()=>meldung(`${l.length} Läufe als CSV kopiert (in Excel einfügen, dann Text in Spalten mit Semikolon)`);
+  if(navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(fertig).catch(()=>kopierenAlt(text, fertig));
+  else kopierenAlt(text, fertig);
+}
+
+// ================= Benachrichtigungen =================
+let swReg=null;
+function benachrAn(){ try{ return localStorage.getItem("sm-benachr")==="1"; }catch(e){ return false; } }
+function swRegistrieren(){   // Android zeigt Mitteilungen nur über einen Service Worker (sw.js daneben)
+  if("serviceWorker" in navigator && window.isSecureContext && !demoModus)
+    navigator.serviceWorker.register("sw.js").then(r=>{ swReg=r; }).catch(()=>{});
+}
+async function benachrUmschalten(){
+  if(benachrAn()){ try{ localStorage.setItem("sm-benachr","0"); }catch(e){} anzeigen(); meldung("Benachrichtigungen aus"); return; }
+  let erlaubt=false;
+  if("Notification" in window){
+    let p=Notification.permission;
+    if(p==="default"){ try{ p=await Notification.requestPermission(); }catch(e){} }
+    erlaubt = p==="granted";
+  }
+  try{ localStorage.setItem("sm-benachr","1"); }catch(e){}
+  anzeigen();
+  if(erlaubt) melden("Benachrichtigungen sind an", "So meldet sich die Sortiermaschine bei Fehlern, „Magazin leer“ und erreichtem Abzählziel.", true);
+  meldung(erlaubt ? "Benachrichtigungen an" : "vibrate" in navigator ? "An – nur Vibration (Mitteilungen wurden nicht erlaubt)" : "Mitteilungen wurden im Browser nicht erlaubt");
+}
+function melden(titel, text, test){
+  if(demoModus || !benachrAn()) return;
+  if(navigator.vibrate) navigator.vibrate([200,100,200,100,400]);
+  if(!("Notification" in window) || Notification.permission!=="granted") return;
+  if(!test && document.visibilityState==="visible" && document.hasFocus()) return;   // Seite ist ohnehin im Blick
+  const opt={body:text, tag:"sortiermaschine", renotify:true};
+  if(swReg && swReg.showNotification){ swReg.showNotification(titel, opt).catch(()=>{}); return; }
+  try{ new Notification(titel, opt); }catch(e){}
+}
+
+// ================= Farben verwalten / Einlern-Assistent =================
+let assistent={aktiv:false, platz:0, ende:false};
+function hexAus(farbe){
+  if(/^#[0-9a-f]{6}$/i.test(farbe)) return farbe;
+  const c=document.createElement("canvas").getContext("2d"); c.fillStyle=farbe; const f=c.fillStyle;
+  return /^#[0-9a-f]{6}$/i.test(f) ? f : "#9aa09d";
+}
+function nameAusEingabe(t){   // Umlaute wie im Arduino umschreiben, Leerzeichen weg
+  return t.trim().replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/Ä/g,"Ae").replace(/Ö/g,"Oe").replace(/Ü/g,"Ue").replace(/ß/g,"ss").replace(/\s+/g,"");
+}
+function platzUmbenennen(i, eingabe){
+  const neu=nameAusEingabe(eingabe);
+  if(!neu || neu===FARBEN[i].name) return false;
+  if(!NAME_MUSTER.test(neu)){ meldung("Name: 1–10 Zeichen, Buchstabe am Anfang, nur Buchstaben, Ziffern und -"); return false; }
+  const doppelt=FARBEN.findIndex((f,j)=>j!==i && f.name.toLowerCase()===neu.toLowerCase());
+  if(doppelt>=0){ meldung(`„${neu}“ gibt es schon (Behälter ${doppelt+1})`); return false; }
+  senden(`name ${i+1} ${neu}`);
+  return true;
+}
+function farbenDialogOeffnen(){
+  assistent={aktiv:false, platz:0, ende:false};
+  farbenDialogZeigen(); $("dlgFarben").showModal();
+  if(z.bereit && z.einricht) senden("l");   // aktuelle Namen und Farbwerte holen
+}
+function farbenDialogZeigen(){
+  const liste=$("farbenListe"), aktiv=z.verbunden && z.bereit;
+  liste.hidden=assistent.aktiv; $("farbenHinweis").hidden=assistent.aktiv; $("assistent").hidden=!assistent.aktiv;
+  setzen("btnAssistent", assistent.aktiv ? "Zur Liste" : "Assistent starten");
+  setzen("dlgFarbenTitel", assistent.aktiv ? "Einlern-Assistent" : "Farben verwalten");
+  setzen("dlgFarbenText", assistent.aktiv ? "Behälter für Behälter: Kugel an die Schranke legen und einlernen. Am Ende speichern."
+                                          : "Die 7 Behälter behalten ihre Winkel. Hier legst du fest, welche Farbe in welchen Behälter kommt.");
+  if(assistent.aktiv){ assistentZeigen(); return; }
+  if(liste.contains(document.activeElement) && document.activeElement.tagName==="INPUT") return;   // Tippen nicht stören
+  liste.innerHTML=FARBEN.map((f,i)=>{
+    const st=z.lernStatus[i], p=z.pos[f.name];
+    const info = st ? st.text : p && p.r!=null ? `R ${Math.round(p.r)} · G ${Math.round(p.g)} · B ${Math.round(p.b)}` : "";
+    const kl = st ? ({ok:"ok", warn:"warn", fehler:"fehler"}[st.zustand]||"") : "";
+    return `<div class="farbslot">
+      <label class="farbwahl" title="Anzeigefarbe in dieser Oberfläche"><input type="color" data-farbe-platz="${i}" value="${hexAus(f.farbe)}" aria-label="Anzeigefarbe Behälter ${i+1}"><i class="kugel" style="background:${f.farbe}"></i></label>
+      <div class="slot-text">
+        <input data-name-platz="${i}" value="${esc(f.name)}" maxlength="12" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Name Behälter ${i+1}" ${aktiv ? "" : "disabled"}>
+        <span class="${kl}">Behälter ${i+1}${info ? " · "+esc(info) : ""}</span>
+      </div>
+      <button class="k-lernen" data-cmd="k ${i+1}" ${aktiv ? "" : "disabled"}>Einlernen</button>
+      <div class="pfeile">
+        <button data-cmd="tausch ${i+1} ${i}" ${i===0 ? "hidden" : ""} ${aktiv ? "" : "disabled"} title="Mit Behälter ${i} tauschen" aria-label="Mit Behälter ${i} tauschen">▲</button>
+        <button data-cmd="tausch ${i+1} ${i+2}" ${i===6 ? "hidden" : ""} ${aktiv ? "" : "disabled"} title="Mit Behälter ${i+2} tauschen" aria-label="Mit Behälter ${i+2} tauschen">▼</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+function assistentZeigen(){
+  const i=assistent.platz, f=FARBEN[i], st=z.lernStatus[i], aktiv=z.verbunden && z.bereit;
+  const fertig=z.lernStatus.filter(s=>s && (s.zustand==="ok" || s.zustand==="warn")).length;
+  $("aSchrittInhalt").hidden=assistent.ende; $("aEnde").hidden=!assistent.ende;
+  setzen("aFertig", `${fertig} von 7 eingelernt`);
+  $("aBalken").style.width=((assistent.ende ? 7 : i)/7*100)+"%";
+  if(assistent.ende){
+    setzen("aSchritt", "Fertig – jetzt speichern");
+    $("aZusammenfassung").innerHTML=FARBEN.map((g,j)=>{
+      const s=z.lernStatus[j];
+      const [txt,kl] = !s ? ["übersprungen","leise"] : s.zustand==="ok" ? ["eingelernt","gut"] : s.zustand==="warn" ? ["eingelernt · nah an anderer Farbe","schlecht"] : s.zustand==="fehler" ? ["nicht geklappt","schlecht"] : ["…",""];
+      return `<li><i class="kugel" style="background:${g.farbe}"></i>${j+1} · ${esc(g.text)}<span class="${kl}">${txt}</span></li>`;
+    }).join("");
+    return;
+  }
+  const laeuft = st && st.zustand==="laeuft", erledigt = st && (st.zustand==="ok" || st.zustand==="warn");
+  setzen("aSchritt", `Behälter ${i+1} von 7`);
+  $("aKugel").style.background=f.farbe; setzen("aName", f.text);
+  const feld=$("aNameFeld"); if(document.activeElement!==feld) feld.value=f.name;
+  feld.disabled=!aktiv;
+  setzen("aText", laeuft ? "Wird gemessen – Kugel nicht bewegen …"
+    : erledigt ? (st.zustand==="warn" ? "Eingelernt, aber sehr nah an einer anderen Farbe. Nochmal einlernen oder weiter." : "Eingelernt. Weiter zum nächsten Behälter.")
+    : st && st.zustand==="fehler" ? "Das hat nicht geklappt – Kugel ruhig hinlegen und nochmal."
+    : `Eine ${f.text}-Kugel an die Schranke legen, dann „Einlernen“. Andere Farbe für diesen Behälter? Erst unten umbenennen.`);
+  const zeigen = z.lernAktuell===i && z.lern.length;
+  $("aErgebnis").hidden=!zeigen;
+  $("aErgebnis").innerHTML = zeigen ? z.lern.map(l=>`<li class="${l.warn ? "warn" : ""}">${esc(l.text)}</li>`).join("") : "";
+  const lb=$("aLernen");
+  lb.textContent = laeuft ? "Misst …" : (erledigt || (st && st.zustand==="fehler")) ? "Nochmal einlernen" : "Einlernen";
+  lb.disabled = !aktiv || laeuft;
+  lb.className = (erledigt ? "k-mittel k-rand" : "k-gross k-akzent") + " braucht-verbindung";
+  const w=$("aWeiter");
+  w.textContent = i<6 ? (erledigt ? `Weiter zu Behälter ${i+2}` : "Überspringen") : "Abschließen";
+  w.className = erledigt ? "k-akzent" : "k-rand";
+  $("aZurueck").disabled = i===0;
+}
+
+function zusatzEinrichten(){
+  // Statistik: Diagramm, Testläufe
+  const d=$("diagramm");
+  d.addEventListener("pointermove", diagrammHover);
+  d.addEventListener("pointerdown", diagrammHover);
+  d.addEventListener("pointerleave", diagrammHoverWeg);
+  addEventListener("resize", ()=>{ diagrammNeu=true; if(ansicht==="statistik") requestAnimationFrame(diagrammZeichnen); });
+  $("formLauf").addEventListener("submit", e=>{
+    e.preventDefault();
+    const name=$("laufName").value.trim() || `Lauf ${laeufeLaden().length+1}`;
+    $("laufName").value="";
+    if(z.bereit && !z.einricht && !demoModus){ laufWartetAufCsv=name; senden("csv"); }   // frische Werte holen
+    else laufSpeichern(name);
+  });
+  $("laeufe").addEventListener("change", e=>{
+    const inp=e.target.closest("[data-lauf]"); if(!inp) return;
+    const l=laeufeLaden(), x=l.find(x=>String(x.id)===inp.dataset.lauf);
+    if(x){ x.name=inp.value.trim() || x.name; laeufeSichern(l); }
+  });
+  $("laeufe").addEventListener("keydown", e=>{ if(e.key==="Enter" && e.target.matches("[data-lauf]")) e.target.blur(); });
+  $("laeufe").addEventListener("click", e=>{
+    const b=e.target.closest("[data-lauf-weg]"); if(!b || !bestaetigen(b, b.dataset.frage)) return;
+    laeufeSichern(laeufeLaden().filter(x=>String(x.id)!==b.dataset.laufWeg)); laeufeZeigen();
+  });
+  $("btnLaeufeCsv").addEventListener("click", laeufeCsv);
+  $("btnLaeufeLoeschen").addEventListener("click", e=>{
+    if(!bestaetigen(e.currentTarget, e.currentTarget.dataset.frage)) return;
+    laeufeSichern([]); laeufeZeigen(); meldung("Alle Läufe gelöscht");
+  });
+
+  // Benachrichtigungen
+  $("btnBenachr").addEventListener("click", benachrUmschalten);
+  swRegistrieren();
+
+  // Farben verwalten / Assistent
+  $("btnFarbenVerwalten").addEventListener("click", farbenDialogOeffnen);
+  $("btnFarbenZu").addEventListener("click", ()=>$("dlgFarben").close());
+  $("dlgFarben").addEventListener("click", e=>{ if(e.target===$("dlgFarben")) $("dlgFarben").close(); });
+  $("btnAssistent").addEventListener("click", ()=>{
+    if(assistent.aktiv) assistent.aktiv=false;
+    else { assistent={aktiv:true, platz:0, ende:false}; z.lernStatus=[]; z.lern=[]; z.lernAktuell=-1; }
+    farbenDialogZeigen();
+  });
+  $("farbenListe").addEventListener("change", e=>{
+    const n=e.target.closest("[data-name-platz]"), c=e.target.closest("[data-farbe-platz]");
+    if(n){ const i=+n.dataset.namePlatz; if(!platzUmbenennen(i, n.value)) n.value=FARBEN[i].name; }
+    if(c){
+      const i=+c.dataset.farbePlatz, eigen=eigeneFarben(); eigen[FARBEN[i].name]=c.value;
+      try{ localStorage.setItem("sm-farben", JSON.stringify(eigen)); }catch(err){}
+      FARBEN[i]=farbeAus(FARBEN[i].name, z.pos[FARBEN[i].name]); farbenGeaendert=true; anzeigen();
+    }
+  });
+  $("farbenListe").addEventListener("keydown", e=>{ if(e.key==="Enter" && e.target.matches("[data-name-platz]")) e.target.blur(); });
+  $("aLernen").addEventListener("click", ()=>senden(`k ${assistent.platz+1}`));
+  $("aWeiter").addEventListener("click", ()=>{ if(assistent.platz<6) assistent.platz++; else assistent.ende=true; farbenDialogZeigen(); });
+  $("aZurueck").addEventListener("click", ()=>{ if(assistent.ende) assistent.ende=false; else if(assistent.platz>0) assistent.platz--; farbenDialogZeigen(); });
+  $("aNameOk").addEventListener("click", ()=>{ if(!platzUmbenennen(assistent.platz, $("aNameFeld").value)) $("aNameFeld").value=FARBEN[assistent.platz].name; });
+  $("aNameFeld").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); $("aNameOk").click(); } });
+}
+
 // ================= Winkel-Schieber (Einrichtbetrieb) =================
 // Ziehen oder Antippen bewegt den gewählten Servo: Beim Ziehen geht höchstens alle
 // SCHIEBER_TAKT ms ein "w <Winkel>" raus, beim Loslassen immer der Endwert.
@@ -1941,6 +2585,23 @@ function demo(){
     "Neuer Zustand: WARTEN", "Neuer Zustand: SCHRITT_1", "Neuer Zustand: SCHRITT_2",
   ].forEach(ein);
   FARBEN.forEach((f,i)=>{ z.anzahl[i]=+z.stat[f.name]; });   // Zähler wie in der CSV
+  // Beispieldaten für Tempo-Verlauf, Messqualität und Helligkeit (20 Minuten)
+  const jetzt=Date.now(), start=jetzt-20*60000, namen=["Gelb","Gruen","Lila","Weiss","Blau"];
+  let t=start;
+  z.verlauf=[]; z.messungen=[]; z.hellVerlauf=[]; z.ereignisse=[];
+  for(let n=1; n<=45; n++){
+    const stau = n%9===0;                                    // ab und zu hängt der Trichter
+    t += (stau ? 8 : 2.2+Math.random()*0.8)*1000;
+    if(n===20){ z.ereignisse.push({zeit:t, art:"pause"}); t+=90000; z.ereignisse.push({zeit:t, art:"weiter"}); }
+    if(stau){ z.ereignisse.push({zeit:t-5000, art:"ruetteln"}); }
+    const name=namen[n%namen.length], d1=20+Math.random()*35+(name==="Gruen" ? 25 : 0);
+    const zweite = name==="Gruen" ? "Gelb" : name==="Gelb" ? "Weiss" : "Blau";
+    const d2 = d1 + (name==="Gruen" ? 12+Math.random()*20 : 60+Math.random()*60);
+    z.verlauf.push({zeit:t, nr:n, name, zyklus:stau ? 7.9 : 2.2+Math.random()*0.8});
+    z.messungen.push({zeit:t, versuch:1, name, d1, zweite, d2, unbekannt:false});
+    z.hellVerlauf.push({zeit:t, wert:1, mittel:0.995+n*0.0009});
+  }
+  z.ereignisse.push({zeit:start+14*60000, art:"fehler"});
   const art=p.get("ansicht");
   if(art==="statistik") ansicht="statistik";
   if(art==="pause"){ ein("Pause angefordert, laufende Kugel wird noch sortiert"); ein("Pause"); }
